@@ -116,7 +116,7 @@ Route to human review queue   Log to audit store
 |---|---|
 | Source | FREUID Challenge 2026 dataset (Kaggle) |
 | Ingestion | Kaggle API → local `data/` directory |
-| Preprocessing | Resize to 224×224 (EfficientNet) or 448×448 (EVA-02, ConvNeXt); normalise; EXIF strip |
+| Preprocessing | Resize to target backbone resolution (EfficientNet-B4: 380×380; EVA-02-Large: 448×448; ConvNeXt-V2-Base: 384×384); normalise; EXIF strip |
 | Augmentation | Random flip, rotate, colour jitter, cutout (training only) |
 | Versioning | DVC — dataset hash locked per experiment run |
 | Splits | 70% train / 15% validation / 15% test — deterministic seed |
