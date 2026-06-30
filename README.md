@@ -2,39 +2,69 @@
 
 A production-grade AI system designed to detect next-generation identity document fraud, built for the **FREUID Challenge 2026** (hosted at IJCAI-ECAI 2026).
 
-ARGUS is designed to address three primary types of document forgery:
+ARGUS addresses three primary types of document forgery:
+
 1. **Physical Manipulations**: Alterations made directly on physical document substrates.
 2. **GenAI-Driven Edits**: Digital manipulations generated using generative AI tools.
 3. **Print-and-Capture (Recapture) Attacks**: Forged documents that are printed and re-photographed to mask digital editing artifacts.
 
+> **Current Status**: Active Development — Phase 0 (Architecture Vision)
+> Full lifecycle is governed by the [Enterprise AI Project Runbook](docs/project_runbook.md).
+
 ---
 
-## Project Status & Roadmap
+## Repository Structure
 
-This project is currently in active development. The system architecture, compliance checkpoints, and delivery roadmap are guided by the [Enterprise AI Project Runbook](docs/project_runbook.md).
-
-### Planned Repository Structure
 ```text
 ARGUS/
+├── data/                           # Raw and processed datasets (gitignored)
+│   └── the-freuid-challenge-2026/  # Kaggle competition data
 ├── docs/                           # Architecture and design documentation
-│   ├── project_runbook.md          # End-to-end project runbook
-│   ├── 00_Project_Charter.md       # Project Charter (Phase 0)
-│   ├── 01_Architecture_Vision.md   # TOGAF Phase A Architecture Vision (Phase 0)
-│   ├── 02_BRD.md                   # Business Requirements Document (Phase 1)
-│   ├── 03_Use_Case_Specification.md# Use Case Specifications (Phase 1)
-│   ├── 04_SAD.md                   # Solution Architecture Document (Phase 2)
-│   ├── 05_DAD.md                   # Data Architecture Document (Phase 2)
-│   ├── adr/                        # Architecture Decision Records (Phase 2)
-│   ├── 06_ML_Design.md             # AI/ML Design Document (Phase 3)
-│   ├── 07_Test_Strategy.md         # Test Strategy (Phase 3)
-│   ├── 08_Security_Compliance.md   # Security & Compliance (Phase 4)
-│   └── 09_Operations_Runbook.md    # Operations Runbook (Phase 4)
+│   ├── project_runbook.md          # End-to-end project execution runbook
+│   ├── Phase-0/                    # Preliminary & Vision (Phase 0)
+│   │   ├── 00_Project_Charter.md
+│   │   ├── 01_Architecture_Vision.md
+│   │   ├── 00_Stakeholder_Matrix.md
+│   │   ├── 00_Kickoff_Agenda.md
+│   │   └── 00_ARB_Vision_Review.md
+│   ├── Phase-1/                    # Business & Requirements (Phase 1)
+│   │   ├── 02_BRD.md
+│   │   ├── 03_Use_Case_Specification.md
+│   │   └── 04_Requirements_Walkthrough.md
+│   ├── Phase-2/                    # Architecture & Design (Phase 2)
+│   │   ├── 04_SAD.md
+│   │   ├── 05_DAD.md
+│   │   └── adr/                    # Architecture Decision Records
+│   ├── Phase-3/                    # Development & QA (Phase 3)
+│   │   ├── 06_ML_Design.md
+│   │   └── 07_Test_Strategy.md
+│   └── Phase-4/                    # Deployment & Operations (Phase 4)
+│       ├── 08_Security_Compliance.md
+│       └── 09_Operations_Runbook.md
+├── notebooks/                      # Exploratory data analysis (EDA)
+│   └── 01_EDA.ipynb
+├── scripts/                        # Utility and setup scripts
+│   ├── setup.sh                    # Environment bootstrap script
+│   └── download_data.sh            # Kaggle dataset download helper
 ├── src/                            # Core source code
 │   ├── data/                       # Preprocessing and augmentation pipelines
 │   ├── models/                     # Model definitions and ensembles
-│   └── training/                   # Training and evaluation scripts
+│   ├── training/                   # Training and evaluation scripts
+│   └── api/                        # FastAPI inference service
 ├── configs/                        # Hydra configuration files
-└── notebooks/                      # Exploratory data analysis (EDA)
+│   ├── model/
+│   ├── training/
+│   └── inference/
+├── tests/                          # Unit, integration, and performance tests
+│   ├── unit/
+│   ├── integration/
+│   └── performance/
+├── .github/
+│   └── workflows/                  # CI/CD pipeline definitions
+├── requirements.txt                # Python dependencies
+├── pyproject.toml                  # Project metadata and tooling config
+├── Dockerfile                      # Production container image
+└── LICENSE                         # Apache 2.0 License
 ```
 
 ---
@@ -42,41 +72,103 @@ ARGUS/
 ## Technical Approach
 
 ### Model Architecture
-The system will utilize an ensemble of diverse deep learning backbones to balance latency and accuracy:
-- **EVA-02-Large** / **ConvNeXt-V2-Base**: High-capacity feature extractors for fine-grained texture and pattern analysis.
-- **EfficientNet-B4**: A lightweight backbone optimized for lower-latency inference.
+
+The system utilises an ensemble of diverse deep learning backbones to balance latency and accuracy:
+
+| Backbone | Role | Trade-off |
+|---|---|---|
+| **EVA-02-Large** | High-capacity feature extractor | Highest accuracy, higher latency |
+| **ConvNeXt-V2-Base** | Fine-grained texture/pattern analysis | Strong accuracy, moderate latency |
+| **EfficientNet-B4** | Lightweight backbone | Lowest latency, optimised for production |
 
 ### Evaluation Metrics
-We optimize for the competition's primary metric along with key production-focused metrics:
-- **AuDET** (Area under the Detection Error Trade-off curve): Evaluates overall system trade-offs.
-- **APCER @ 1% BPCER**: Measures the rate of fraudulent documents accepted when the false rejection rate of genuine documents is capped at 1%.
+
+| Metric | Description | Target |
+|---|---|---|
+| **AuDET** | Area under the Detection Error Trade-off curve | Maximise |
+| **APCER @ 1% BPCER** | Fraudulent acceptance rate when genuine rejection rate ≤ 1% | Minimise |
 
 ---
 
 ## Quick Start
 
-### 1. Setup Environment
+### Prerequisites
+
+- Python 3.10+
+- Conda or virtualenv
+- Kaggle API credentials (`~/.kaggle/kaggle.json`)
+- Docker (for containerised inference)
+
+### 1. Clone & Bootstrap Environment
+
 ```bash
 git clone https://github.com/praveenmittal/ARGUS
 cd ARGUS
 bash scripts/setup.sh
 ```
 
+`setup.sh` will create a virtual environment, install all dependencies from `requirements.txt`, and configure pre-commit hooks.
+
 ### 2. Dataset Acquisition
-Ensure your Kaggle API credentials are configured in `~/.kaggle/kaggle.json`:
+
 ```bash
+bash scripts/download_data.sh
+# Or manually:
 kaggle competitions download -c the-freuid-challenge-2026-ijcai-ecai -p data/
-unzip data/the-freuid-challenge-2026-ijcai-ecai.zip -d data/
+unzip data/the-freuid-challenge-2026-ijcai-ecai.zip -d data/the-freuid-challenge-2026/
+```
+
+### 3. Run EDA
+
+```bash
+jupyter notebook notebooks/01_EDA.ipynb
+```
+
+### 4. Train a Model
+
+```bash
+python src/training/train.py --config-name efficientnet_b4
+```
+
+### 5. Run Inference API (Docker)
+
+```bash
+docker build -t argus:latest .
+docker run -p 8000:8000 argus:latest
+# API docs at http://localhost:8000/docs
 ```
 
 ---
 
+## Development Workflow
+
+This project follows a trunk-based development model:
+
+1. Branch from `main` using the convention `feature/<phase>-<short-description>`
+2. Implement changes, ensuring all tests pass: `pytest tests/`
+3. Run linting and formatting: `ruff check . && ruff format .`
+4. Open a Pull Request — CI/CD gates must pass before merge
+5. Squash-merge into `main`
+
+---
+
+## Compliance & Governance
+
+ARGUS is designed with regulatory compliance embedded from Phase 0:
+
+- **EU AI Act** (High-Risk AI System — Biometric/Identity): Risk management, human oversight, and transparency requirements built into the architecture.
+- **GDPR**: No PII is stored beyond ephemeral processing; EXIF stripping applied at ingestion.
+- **ISO/IEC 42001**: AI management system controls documented in `docs/08_Security_Compliance.md`.
+
+---
+
 ## Author
-**Praveen Mittal**  
+
+**Praveen Mittal**
 [praveenmittal.com](https://praveenmittal.com) | [LinkedIn](https://linkedin.com/in/praveen-mittal)
 
 ---
 
 ## License
-Licensed under the Apache 2.0 License. See [LICENSE](LICENSE) for details.
 
+Licensed under the Apache 2.0 License. See [LICENSE](LICENSE) for details.
