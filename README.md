@@ -18,9 +18,17 @@ This project is currently in active development. The system architecture, compli
 ARGUS/
 ├── docs/                           # Architecture and design documentation
 │   ├── project_runbook.md          # End-to-end project runbook
-│   ├── 01_BRD.md                   # Business Requirements
-│   ├── 02_SAD.md                   # Solution Architecture
-│   └── adr/                        # Architecture Decision Records
+│   ├── 00_Project_Charter.md       # Project Charter (Phase 0)
+│   ├── 01_Architecture_Vision.md   # TOGAF Phase A Architecture Vision (Phase 0)
+│   ├── 02_BRD.md                   # Business Requirements Document (Phase 1)
+│   ├── 03_Use_Case_Specification.md# Use Case Specifications (Phase 1)
+│   ├── 04_SAD.md                   # Solution Architecture Document (Phase 2)
+│   ├── 05_DAD.md                   # Data Architecture Document (Phase 2)
+│   ├── adr/                        # Architecture Decision Records (Phase 2)
+│   ├── 06_ML_Design.md             # AI/ML Design Document (Phase 3)
+│   ├── 07_Test_Strategy.md         # Test Strategy (Phase 3)
+│   ├── 08_Security_Compliance.md   # Security & Compliance (Phase 4)
+│   └── 09_Operations_Runbook.md    # Operations Runbook (Phase 4)
 ├── src/                            # Core source code
 │   ├── data/                       # Preprocessing and augmentation pipelines
 │   ├── models/                     # Model definitions and ensembles
