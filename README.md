@@ -34,6 +34,7 @@ ARGUS/
 │   ├── Phase-2/                    # Architecture & Design (Phase 2)
 │   │   ├── 04_SAD.md
 │   │   ├── 05_DAD.md
+│   │   ├── 06_ARB_Design_Sign_Off.md
 │   │   └── adr/                    # Architecture Decision Records
 │   ├── Phase-3/                    # Development & QA (Phase 3)
 │   │   ├── 06_ML_Design.md
