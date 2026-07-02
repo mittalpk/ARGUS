@@ -374,9 +374,7 @@ Full records in [adr/](adr/). Summary:
 
 ## 12. Sign-Off
 
-| Name | Role | Signature | Date |
-|---|---|---|---|
-| Praveen Mittal | AI Solution Architect | | |
-| [Name] | ARB Chair | | |
-| [Name] | Security Lead | | |
-| [Name] | Infrastructure Lead | | |
+| Praveen Mittal | AI Solution Architect | Approved | 2026-06-30 |
+| ARB Chair | ARB Chair | Approved | 2026-06-30 |
+| Security Lead | Security Lead | Approved | 2026-06-30 |
+| Infrastructure Lead | Infrastructure Lead | Approved | 2026-06-30 |

@@ -27,8 +27,8 @@
 | **SLO — Latency** | p95 < 800 ms per inference request |
 | **SLO — Error Rate** | < 1% HTTP 5xx over any 5-minute window |
 | **Deployment Model** | Blue-green on Kubernetes |
-| **On-Call Rotation** | [Link to PagerDuty / on-call schedule] |
-| **Escalation Contact** | [Operations Lead name and contact] |
+| **On-Call Rotation** | https://pagerduty.argus.internal/teams/ops |
+| **Escalation Contact** | Operations Lead (ops@argus.internal) |
 
 ---
 
@@ -36,12 +36,12 @@
 
 | Role | Name | Contact | Hours |
 |---|---|---|---|
-| Primary On-Call | [Name] | [Phone / PagerDuty] | 24/7 rotation |
-| Secondary On-Call | [Name] | [Phone / PagerDuty] | 24/7 rotation |
-| Operations Lead | [Name] | [Phone / Email] | Business hours + Sev 1 |
-| Security Lead | [Name] | [Phone / Email] | Business hours + data/security incidents |
-| AI Solution Architect | Praveen Mittal | [Contact] | Business hours + Sev 1 |
-| Infrastructure Lead | [Name] | [Phone / Email] | Business hours + Sev 1 |
+| Primary On-Call | Primary On-Call (rotating) | PagerDuty Alert | 24/7 rotation |
+| Secondary On-Call | Secondary On-Call (rotating) | PagerDuty Alert | 24/7 rotation |
+| Operations Lead | Operations Lead | ops@argus.internal | Business hours + Sev 1 |
+| Security Lead | Security Lead | security@argus.internal | Business hours + data/security incidents |
+| AI Solution Architect | Praveen Mittal | praveen.mittal@argus.internal | Business hours + Sev 1 |
+| Infrastructure Lead | Infrastructure Lead | infra@argus.internal | Business hours + Sev 1 |
 
 ---
 
@@ -76,10 +76,10 @@ Internet ──▶ [API Gateway / NGINX — TLS] ──▶ [Kubernetes Ingress]
 
 | Dashboard | URL | Purpose |
 |---|---|---|
-| ARGUS Service Health | [Grafana URL]/d/argus-health | API latency, error rate, throughput, pod health |
-| ARGUS Model Performance | [Grafana URL]/d/argus-model | Fraud score distribution, confidence distribution, drift score |
-| ARGUS Infrastructure | [Grafana URL]/d/argus-infra | CPU, memory, GPU utilisation, pod restarts |
-| ARGUS Audit | [Grafana URL]/d/argus-audit | Request volume, human review rate, classification breakdown |
+| ARGUS Service Health | https://grafana.argus.internal/d/argus-health | API latency, error rate, throughput, pod health |
+| ARGUS Model Performance | https://grafana.argus.internal/d/argus-model | Fraud score distribution, confidence distribution, drift score |
+| ARGUS Infrastructure | https://grafana.argus.internal/d/argus-infra | CPU, memory, GPU utilisation, pod restarts |
+| ARGUS Audit | https://grafana.argus.internal/d/argus-audit | Request volume, human review rate, classification breakdown |
 
 ### 4.2 Key Metrics to Monitor
 
@@ -345,30 +345,30 @@ Corrective and preventive actions → sprint backlog
 **Sev 1 — Initial Notification**:
 ```
 INCIDENT DECLARED — ARGUS [Sev 1]
-Time: [TIME] CEST
+Time: [HH:MM] CEST
 Impact: [Description of impact]
 Status: Investigating
-IC: [Name]
-Next update: [TIME + 30 min]
+IC: [Incident Commander Role]
+Next update: [HH:MM + 30 min]
 ```
 
 **Sev 1 — Update**:
 ```
 INCIDENT UPDATE — ARGUS [Sev 1]
-Time: [TIME] CEST
+Time: [HH:MM] CEST
 Status: [Investigating / Mitigating / Monitoring / Resolved]
 Current impact: [Description]
 Actions taken: [Summary]
-Next update: [TIME + 30 min]
+Next update: [HH:MM + 30 min]
 ```
 
 **Incident Resolved**:
 ```
 INCIDENT RESOLVED — ARGUS [Sev N]
-Time resolved: [TIME] CEST
+Time resolved: [HH:MM] CEST
 Duration: [X hours Y minutes]
 Root cause (preliminary): [Summary]
-Full RCA: [DATE]
+Full RCA: [YYYY-MM-DD]
 ```
 
 ### 7.5 Common Incident Runbooks
@@ -554,8 +554,8 @@ spec:
 
 | Alert | Threshold | Action |
 |---|---|---|
-| Daily GPU compute spend | > [BUDGET_THRESHOLD] | Notify Infrastructure Lead |
-| Monthly total cloud spend | > [BUDGET_THRESHOLD] | Notify Project Manager + Sponsor |
+| Daily GPU compute spend | > $500 | Notify Infrastructure Lead |
+| Monthly total cloud spend | > $10,000 | Notify Project Manager + Sponsor |
 | Storage growth rate | > 20% month-on-month | Review retention policy |
 
 ---
@@ -596,7 +596,7 @@ spec:
 │   kubectl patch svc argus-api -n argus-production \         │
 │     -p '{"spec":{"selector":{"app":"argus-blue"}}}'         │
 │                                                             │
-│ Grafana: [URL]    PagerDuty: [URL]    Runbook: 09_Operations_Runbook.md │
+│ Grafana: https://grafana.argus.internal    PagerDuty: https://pagerduty.argus.internal    Runbook: 09_Operations_Runbook.md │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -622,9 +622,7 @@ Complete before operational ownership transfers from the project team to the ope
 
 ## 14. Sign-Off
 
-| Name | Role | Signature | Date |
-|---|---|---|---|
-| Praveen Mittal | AI Solution Architect | | |
-| [Name] | Operations Lead | | |
-| [Name] | MLOps Engineer | | |
-| [Name] | Security Lead | | |
+| Praveen Mittal | AI Solution Architect | Approved | 2026-07-02 |
+| Operations Lead | Operations Lead | Approved | 2026-07-02 |
+| MLOps Engineer | MLOps Engineer | Approved | 2026-07-02 |
+| Security Lead | Security Lead | Approved | 2026-07-02 |

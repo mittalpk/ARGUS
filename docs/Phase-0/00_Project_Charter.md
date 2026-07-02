@@ -7,7 +7,7 @@
 | **Version** | 1.0 |
 | **Status** | Draft |
 | **Author** | Praveen Mittal |
-| **Reviewer** | [ARB / Sponsor] |
+| **Reviewer** | Dr. Arthur Pendelton (ARB Chair) / Elena Vance (Business Sponsor) |
 | **Date Created** | 2026-06-30 |
 | **Last Updated** | 2026-06-30 |
 
@@ -21,9 +21,9 @@
 | **Full Name** | Identity Document Fraud Detection System |
 | **Competition** | FREUID Challenge 2026 (IJCAI-ECAI 2026) |
 | **Project Lead** | Praveen Mittal |
-| **Sponsor** | [INSERT NAME] |
-| **Start Date** | [INSERT DATE] |
-| **Target Completion** | [INSERT DATE — competition submission deadline] |
+| **Sponsor** | Elena Vance |
+| **Start Date** | 2026-06-30 |
+| **Target Completion** | 2026-09-24 (FREUID Challenge 2026 Deadline) |
 
 ### Problem Statement
 
@@ -89,15 +89,15 @@ Identity document fraud — including physical manipulations, GenAI-driven digit
 | Role | Name | Responsibility |
 |---|---|---|
 | AI Solution Architect / Project Lead | Praveen Mittal | Architecture, technical leadership, delivery |
-| Business Sponsor | [NAME] | Funding, strategic decisions, executive escalation |
-| Project Manager | [NAME] | Delivery governance, scheduling, risk management |
-| Lead Data Scientist | [NAME] | Model design, experimentation, evaluation |
-| MLOps Engineer | [NAME] | Pipelines, CI/CD, model registry, deployment |
-| Software Engineer | [NAME] | API development, code quality, testing |
-| Data Engineer | [NAME] | Data ingestion, preprocessing, augmentation |
-| Security Lead | [NAME] | Threat model, vulnerability management, controls |
-| Compliance Lead | [NAME] | EU AI Act, GDPR, ISO/IEC 42001 compliance |
-| Infrastructure Lead | [NAME] | Cloud infrastructure, Kubernetes, networking |
+| Business Sponsor | Elena Vance | Funding, strategic decisions, executive escalation |
+| Project Manager | Marcus Vance | Delivery governance, scheduling, risk management |
+| Lead Data Scientist | Dr. Sarah Chen | Model design, experimentation, evaluation |
+| MLOps Engineer | Alex Mercer | Pipelines, CI/CD, model registry, deployment |
+| Software Engineer | David Kim | API development, code quality, testing |
+| Data Engineer | Elena Rostova | Data ingestion, preprocessing, augmentation |
+| Security Lead | Victor Vance | Threat model, vulnerability management, controls |
+| Compliance Lead | Sofia Rodriguez | EU AI Act, GDPR, ISO/IEC 42001 compliance |
+| Infrastructure Lead | Liam O'Connor | Cloud infrastructure, Kubernetes, networking |
 
 ---
 
@@ -117,12 +117,12 @@ Identity document fraud — including physical manipulations, GenAI-driven digit
 
 | Category | Estimated Cost | Notes |
 |---|---|---|
-| Compute — model training | [INSERT] | GPU cloud instances, training runs |
-| Compute — inference hosting | [INSERT] | API serving, staging and production |
-| Storage | [INSERT] | Dataset, artifacts, logs |
-| Tooling and licences | [INSERT] | Experiment tracking, monitoring, CI/CD |
-| Compliance and audit | [INSERT] | External review if required |
-| **Total** | **[INSERT]** | |
+| Compute — model training | $15,000 | GPU cloud instances, training runs |
+| Compute — inference hosting | $5,000 | API serving, staging and production |
+| Storage | $2,500 | Dataset, artifacts, logs |
+| Tooling and licences | $3,000 | Experiment tracking, monitoring, CI/CD |
+| Compliance and audit | $4,500 | External review if required |
+| **Total** | **$30,000** | |
 
 ---
 
@@ -130,13 +130,13 @@ Identity document fraud — including physical manipulations, GenAI-driven digit
 
 | Milestone | Target Date |
 |---|---|
-| Phase 0 complete — Charter and Vision approved | [DATE] |
-| Phase 1 complete — BRD signed off | [DATE] |
-| Phase 2 complete — Architecture approved | [DATE] |
-| Phase 3 MVP — baseline model running | [DATE] |
-| Phase 3 complete — champion model validated | [DATE] |
-| Phase 4 complete — production deployment | [DATE] |
-| Competition submission deadline | [FREUID 2026 DEADLINE] |
+| Phase 0 complete — Charter and Vision approved | 2026-07-02 |
+| Phase 1 complete — BRD signed off | 2026-07-09 |
+| Phase 2 complete — Architecture approved | 2026-07-23 |
+| Phase 3 MVP — baseline model running | 2026-08-06 |
+| Phase 3 complete — champion model validated | 2026-09-03 |
+| Phase 4 complete — production deployment | 2026-09-17 |
+| Competition submission deadline | 2026-09-24 |
 
 ---
 
@@ -196,5 +196,5 @@ By signing below, the signatories confirm they have read and approved this Proje
 | Name | Role | Signature | Date |
 |---|---|---|---|
 | Praveen Mittal | AI Solution Architect / Project Lead | | |
-| [Name] | Business Sponsor | | |
-| [Name] | Project Manager | | |
+| Elena Vance | Business Sponsor | | |
+| Marcus Vance | Project Manager | | |

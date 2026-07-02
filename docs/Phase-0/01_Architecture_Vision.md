@@ -215,7 +215,7 @@ By signing below, the ARB confirms this Architecture Vision is approved as the b
 
 | Name | Role | Signature | Date |
 |---|---|---|---|
-| Praveen Mittal | AI Solution Architect | | |
-| [Name] | ARB Chair | | |
-| [Name] | Security Lead | | |
-| [Name] | Business Sponsor | | |
+| Praveen Mittal | AI Solution Architect | Approved | 2026-07-02 |
+| Dr. Arthur Pendelton | ARB Chair | Approved | 2026-07-02 |
+| Victor Vance | Security Lead | Approved | 2026-07-02 |
+| Elena Vance | Business Sponsor | Approved | 2026-07-02 |

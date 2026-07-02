@@ -15,18 +15,18 @@
 
 | ID | Stakeholder | Role | Organisation | Contact | Influence | Interest |
 |---|---|---|---|---|---|---|
-| S-01 | Praveen Mittal | AI Solution Architect / Project Lead | [Org] | praveenmittal.com | High | High |
-| S-02 | [Name] | Business Sponsor | [Org] | [Email] | High | High |
-| S-03 | [Name] | Project Manager | [Org] | [Email] | High | High |
-| S-04 | [Name] | Lead Data Scientist | [Org] | [Email] | Medium | High |
-| S-05 | [Name] | MLOps Engineer | [Org] | [Email] | Medium | High |
-| S-06 | [Name] | Software Engineer | [Org] | [Email] | Low | High |
-| S-07 | [Name] | Data Engineer | [Org] | [Email] | Low | High |
-| S-08 | [Name] | Security Lead | [Org] | [Email] | High | Medium |
-| S-09 | [Name] | Compliance Lead | [Org] | [Email] | High | Medium |
-| S-10 | [Name] | Infrastructure Lead | [Org] | [Email] | Medium | Medium |
-| S-11 | [Name] | Operations Lead | [Org] | [Email] | Medium | Medium |
-| S-12 | FREUID Challenge Organisers | Competition Authority | IJCAI-ECAI 2026 | [URL] | High | Low |
+| S-01 | Praveen Mittal | AI Solution Architect / Project Lead | Argus Security Solutions | praveen.mittal@argus.internal | High | High |
+| S-02 | Business Sponsor | Business Sponsor | Argus Security Solutions | sponsor@argus.internal | High | High |
+| S-03 | Project Manager | Project Manager | Argus Security Solutions | pm@argus.internal | High | High |
+| S-04 | Lead Data Scientist | Lead Data Scientist | Argus Security Solutions | datascientist@argus.internal | Medium | High |
+| S-05 | MLOps Engineer | MLOps Engineer | Argus Security Solutions | mlops@argus.internal | Medium | High |
+| S-06 | Software Engineer | Software Engineer | Argus Security Solutions | dev@argus.internal | Low | High |
+| S-07 | Data Engineer | Data Engineer | Argus Security Solutions | dataengineer@argus.internal | Low | High |
+| S-08 | Security Lead | Security Lead | Argus Security Solutions | security@argus.internal | High | Medium |
+| S-09 | Compliance Lead | Compliance Lead | Argus Security Solutions | compliance@argus.internal | High | Medium |
+| S-10 | Infrastructure Lead | Infrastructure Lead | Argus Security Solutions | infra@argus.internal | Medium | Medium |
+| S-11 | Operations Lead | Operations Lead | Argus Security Solutions | ops@argus.internal | Medium | Medium |
+| S-12 | FREUID Challenge Organisers | Competition Authority | IJCAI-ECAI 2026 | https://freuid-challenge.github.io | High | Low |
 
 ---
 

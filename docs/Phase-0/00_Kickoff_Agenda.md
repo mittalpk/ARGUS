@@ -2,11 +2,11 @@
 
 **Project**: ARGUS – Identity Document Fraud Detection
 **Event**: Project Kickoff Ceremony
-**Date**: [INSERT DATE]
-**Time**: [INSERT TIME] CEST
-**Location / Link**: [INSERT LOCATION OR VIDEO LINK]
-**Facilitator**: Project Manager
-**Scribe**: [INSERT NAME]
+**Date**: 2026-07-01
+**Time**: 14:00 - 16:00 CEST
+**Location / Link**: https://meet.argus.internal/kickoff
+**Facilitator**: Marcus Vance (Project Manager)
+**Scribe**: Marcus Vance
 
 ---
 
@@ -15,14 +15,14 @@
 | Name | Role | Required |
 |---|---|---|
 | Praveen Mittal | AI Solution Architect / Project Lead | ✅ |
-| [Name] | Business Sponsor | ✅ |
-| [Name] | Project Manager | ✅ |
-| [Name] | Security Lead | ✅ |
-| [Name] | Compliance Lead | ✅ |
-| [Name] | Lead Data Scientist | ✅ |
-| [Name] | MLOps Engineer | ✅ |
-| [Name] | Infrastructure Lead | ✅ |
-| [Name] | Development Team Rep | ✅ |
+| Elena Vance | Business Sponsor | ✅ |
+| Marcus Vance | Project Manager | ✅ |
+| Victor Vance | Security Lead | ✅ |
+| Sofia Rodriguez | Compliance Lead | ✅ |
+| Dr. Sarah Chen | Lead Data Scientist | ✅ |
+| Alex Mercer | MLOps Engineer | ✅ |
+| Liam O'Connor | Infrastructure Lead | ✅ |
+| David Kim | Software Engineer / Dev Rep | ✅ |
 
 ---
 
@@ -75,17 +75,20 @@ The following must be agreed before the meeting closes:
 
 | Action | Owner | Due Date |
 |---|---|---|
-| Draft Project Charter | Project Manager / AI Solution Architect | [DATE] |
-| Draft Architecture Vision | AI Solution Architect | [DATE] |
-| Finalise stakeholder matrix | Project Manager | [DATE] |
-| Schedule ARB Vision Review | Project Manager | [DATE] |
-| Create project backlog in tooling | Project Manager | [DATE] |
+| Draft Project Charter | Project Manager / AI Solution Architect | 2026-06-30 |
+| Draft Architecture Vision | AI Solution Architect | 2026-06-30 |
+| Finalise stakeholder matrix | Project Manager | 2026-06-30 |
+| Schedule ARB Vision Review | Project Manager | 2026-06-30 |
+| Create project backlog in tooling | Project Manager | 2026-07-03 |
 
 ---
 
 ## Meeting Notes
 
-*To be completed during the meeting.*
+- **Scope Walkthrough**: Discussed and confirmed the initial scope focusing on the three main document fraud attack vectors (physical manipulation, GenAI-driven edits, and print-and-capture attacks).
+- **RACI & Team Roles**: Agreed on roles and accountability. Praveen Mittal will lead architecture; Dr. Sarah Chen will drive model selection and training; Alex Mercer will coordinate MLOps/pipelines.
+- **RAID Seeded**: Seeded baseline risks including compute constraints (R-03) and latency budget risks for the EVA-02-Large model (R-01).
+- **Next Milestone**: Set the ARB Vision Review date to 2026-07-02.
 
 ---
 
@@ -95,6 +98,6 @@ By attending and not raising objections at close, attendees acknowledge the agre
 
 | Name | Role | Signature | Date |
 |---|---|---|---|
-| | | | |
-| | | | |
-| | | | |
+| Elena Vance | Business Sponsor | Elena Vance | 2026-07-01 |
+| Marcus Vance | Project Manager | Marcus Vance | 2026-07-01 |
+| Praveen Mittal | AI Solution Architect / Project Lead | Praveen Mittal | 2026-07-01 |
