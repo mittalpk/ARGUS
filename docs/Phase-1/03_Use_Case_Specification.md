@@ -302,6 +302,7 @@ This document defines all use cases, user stories, failure modes, and edge cases
 | US-09 | As an MLOps engineer, I want a model registry so I can track and promote model versions | Models registered in MLflow with status lifecycle: staging → approved → production |
 | US-10 | As an operations lead, I want Prometheus metrics and a Grafana dashboard so I can monitor the API in production | Dashboard shows p95 latency, error rate, throughput, and fraud score distribution |
 | US-11 | As a compliance lead, I want structured inference audit logs so I can satisfy EU AI Act logging requirements | Every request logged with request_id, timestamp, result, score, model version |
+| US-14 | As a compliance lead, I want compliance evidence packaging so I can compile regulatory audit evidence | Audit evidence pack can be generated on demand |
 
 ### Could Have (Phase 5)
 
