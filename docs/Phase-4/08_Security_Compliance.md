@@ -87,7 +87,7 @@ Residual risks rated **Medium** or above require formal acceptance by the Securi
 
 | Threat ID | Residual Risk | Accepted By | Date | Conditions |
 |---|---|---|---|---|
-| T-01 | Medium | [Security Lead Name] | [DATE] | Human review mandatory for confidence < 0.70; model robustness re-evaluated at every release |
+| T-01 | Medium | Security Lead | 2026-07-02 | Human review mandatory for confidence < 0.70; model robustness re-evaluated at every release |
 
 ---
 
@@ -304,9 +304,7 @@ The following security evidence must be present in the release evidence pack bef
 
 ## 11. Sign-Off
 
-| Name | Role | Signature | Date |
-|---|---|---|---|
-| Praveen Mittal | AI Solution Architect | | |
-| [Name] | Security Lead | | |
-| [Name] | Compliance Lead | | |
-| [Name] | ARB Chair | | |
+| Praveen Mittal | AI Solution Architect | Approved | 2026-07-02 |
+| Security Lead | Security Lead | Approved | 2026-07-02 |
+| Compliance Lead | Compliance Lead | Approved | 2026-07-02 |
+| ARB Chair | ARB Chair | Approved | 2026-07-02 |

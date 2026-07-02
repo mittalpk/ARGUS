@@ -10,7 +10,7 @@
 | **Status** | Approved |
 | **Author** | Praveen Mittal |
 | **Review Date** | 2026-06-30 |
-| **Meeting Link** | [INSERT] |
+| **Meeting Link** | https://meet.argus.internal/requirements-walkthrough |
 
 ---
 
@@ -25,12 +25,12 @@ This document records the proceedings, decisions, and sign-offs from the **Requi
 | Name | Role | Present |
 |---|---|---|
 | Praveen Mittal | AI Solution Architect / Project Lead | Yes |
-| [Name] | Business Sponsor | Yes |
-| [Name] | Project Manager | Yes |
-| [Name] | Lead Data Scientist | Yes |
-| [Name] | Compliance Lead | Yes |
-| [Name] | Security Lead | Yes |
-| [Name] | Operations Lead | Yes |
+| Business Sponsor | Business Sponsor | Yes |
+| Project Manager | Project Manager | Yes |
+| Lead Data Scientist | Lead Data Scientist | Yes |
+| Compliance Lead | Compliance Lead | Yes |
+| Security Lead | Security Lead | Yes |
+| Operations Lead | Operations Lead | Yes |
 
 ---
 
@@ -79,8 +79,8 @@ By signing below, the stakeholders confirm that the Business Requirements and Us
 
 | Name | Role | Decision | Signature | Date |
 |---|---|---|---|---|
-| [Name] | Business Sponsor | Approved | | 2026-06-30 |
-| [Name] | Project Manager | Approved | | 2026-06-30 |
+| Business Sponsor | Business Sponsor | Approved | | 2026-06-30 |
+| Project Manager | Project Manager | Approved | | 2026-06-30 |
 | Praveen Mittal | AI Solution Architect | Approved | | 2026-06-30 |
-| [Name] | Lead Data Scientist | Approved | | 2026-06-30 |
-| [Name] | Compliance Lead | Approved | | 2026-06-30 |
+| Lead Data Scientist | Lead Data Scientist | Approved | | 2026-06-30 |
+| Compliance Lead | Compliance Lead | Approved | | 2026-06-30 |

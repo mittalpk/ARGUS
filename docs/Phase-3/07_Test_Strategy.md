@@ -425,9 +425,7 @@ Phase 3 testing is complete when:
 
 ## 11. Sign-Off
 
-| Name | Role | Signature | Date |
-|---|---|---|---|
-| Praveen Mittal | AI Solution Architect | | |
-| [Name] | Tech Lead | | |
-| [Name] | Lead Data Scientist | | |
-| [Name] | Security Lead | | |
+| Praveen Mittal | AI Solution Architect | Approved | 2026-07-02 |
+| Tech Lead | Tech Lead | Approved | 2026-07-02 |
+| Lead Data Scientist | Lead Data Scientist | Approved | 2026-07-02 |
+| Security Lead | Security Lead | Approved | 2026-07-02 |

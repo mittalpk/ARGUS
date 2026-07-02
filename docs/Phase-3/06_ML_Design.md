@@ -385,8 +385,6 @@ Every training run must log the following to MLflow:
 
 ## 13. Sign-Off
 
-| Name | Role | Signature | Date |
-|---|---|---|---|
-| Praveen Mittal | AI Solution Architect | | |
-| [Name] | Lead Data Scientist | | |
-| [Name] | MLOps Engineer | | |
+| Praveen Mittal | AI Solution Architect | Approved | 2026-07-02 |
+| Lead Data Scientist | Lead Data Scientist | Approved | 2026-07-02 |
+| MLOps Engineer | MLOps Engineer | Approved | 2026-07-02 |

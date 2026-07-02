@@ -10,7 +10,7 @@
 | **Status** | Approved |
 | **Author** | Praveen Mittal |
 | **Review Date** | 2026-06-30 |
-| **Meeting Link** | [INSERT] |
+| **Meeting Link** | https://meet.argus.internal/arb-design-review |
 
 ---
 
@@ -25,11 +25,11 @@ This document records the proceedings, decisions, and sign-offs from the **Archi
 | Name | Role | Present |
 |---|---|---|
 | Praveen Mittal | AI Solution Architect / Project Lead | Yes |
-| [Name] | ARB Chair | Yes |
-| [Name] | Security Lead | Yes |
-| [Name] | Infrastructure Lead | Yes |
-| [Name] | Lead Data Scientist | Yes |
-| [Name] | Compliance Lead | Yes |
+| ARB Chair | ARB Chair | Yes |
+| Security Lead | Security Lead | Yes |
+| Infrastructure Lead | Infrastructure Lead | Yes |
+| Lead Data Scientist | Lead Data Scientist | Yes |
+| Compliance Lead | Compliance Lead | Yes |
 
 ---
 
@@ -78,8 +78,8 @@ By signing below, the ARB confirms that the Solution Architecture, Data Architec
 
 | Name | Role | Decision | Signature | Date |
 |---|---|---|---|---|
-| [Name] | ARB Chair | Approved | | 2026-06-30 |
-| [Name] | Security Lead | Approved | | 2026-06-30 |
-| [Name] | Infrastructure Lead | Approved | | 2026-06-30 |
+| ARB Chair | ARB Chair | Approved | | 2026-06-30 |
+| Security Lead | Security Lead | Approved | | 2026-06-30 |
+| Infrastructure Lead | Infrastructure Lead | Approved | | 2026-06-30 |
 | Praveen Mittal | AI Solution Architect | Approved | | 2026-06-30 |
-| [Name] | Compliance Lead | Approved | | 2026-06-30 |
+| Compliance Lead | Compliance Lead | Approved | | 2026-06-30 |

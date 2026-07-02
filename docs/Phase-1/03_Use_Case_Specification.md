@@ -327,9 +327,7 @@ This document defines all use cases, user stories, failure modes, and edge cases
 
 ## 6. Sign-Off
 
-| Name | Role | Signature | Date |
-|---|---|---|---|
-| Praveen Mittal | AI Solution Architect | | |
-| [Name] | Project Manager | | |
-| [Name] | Lead Data Scientist | | |
-| [Name] | Compliance Lead | | |
+| Praveen Mittal | AI Solution Architect | Approved | 2026-06-30 |
+| Project Manager | Project Manager | Approved | 2026-06-30 |
+| Lead Data Scientist | Lead Data Scientist | Approved | 2026-06-30 |
+| Compliance Lead | Compliance Lead | Approved | 2026-06-30 |

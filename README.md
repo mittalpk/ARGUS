@@ -95,7 +95,7 @@ The system utilises an ensemble of diverse deep learning backbones to balance la
 
 ### Prerequisites
 
-- Python 3.10+
+- Python 3.11
 - Conda or virtualenv
 - Kaggle API credentials (`~/.kaggle/kaggle.json`)
 - Docker (for containerised inference)

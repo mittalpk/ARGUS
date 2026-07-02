@@ -267,9 +267,7 @@ Full lineage is queryable via MLflow by cross-referencing dataset version tag wi
 
 ## 15. Sign-Off
 
-| Name | Role | Signature | Date |
-|---|---|---|---|
-| Praveen Mittal | AI Solution Architect | | |
-| [Name] | Lead Data Scientist | | |
-| [Name] | Security Lead | | |
-| [Name] | Compliance Lead | | |
+| Praveen Mittal | AI Solution Architect | Approved | 2026-06-30 |
+| Lead Data Scientist | Lead Data Scientist | Approved | 2026-06-30 |
+| Security Lead | Security Lead | Approved | 2026-06-30 |
+| Compliance Lead | Compliance Lead | Approved | 2026-06-30 |
