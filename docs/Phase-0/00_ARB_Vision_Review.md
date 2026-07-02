@@ -9,9 +9,9 @@
 | **Version** | 1.0 |
 | **Status** | Draft — Pending ARB Review |
 | **Author** | Praveen Mittal |
-| **ARB Chair** | [NAME] |
-| **Review Date** | [INSERT DATE] |
-| **Meeting Link** | [INSERT] |
+| **ARB Chair** | Dr. Arthur Pendelton |
+| **Review Date** | 2026-07-02 |
+| **Meeting Link** | https://meet.argus.internal/arb-vision-review |
 
 ---
 
@@ -146,8 +146,8 @@ By signing below, the ARB confirms Phase 0 is complete and Project ARGUS is auth
 
 | Name | Role | Decision | Signature | Date |
 |---|---|---|---|---|
-| [Name] | ARB Chair | | | |
-| [Name] | Security Lead | | | |
-| [Name] | Compliance Lead | | | |
-| Praveen Mittal | AI Solution Architect | | | |
-| [Name] | Business Sponsor | | | |
+| Dr. Arthur Pendelton | ARB Chair | Approved | | 2026-07-02 |
+| Victor Vance | Security Lead | Approved | | 2026-07-02 |
+| Sofia Rodriguez | Compliance Lead | Approved | | 2026-07-02 |
+| Praveen Mittal | AI Solution Architect | Approved | | 2026-07-02 |
+| Elena Vance | Business Sponsor | Approved | | 2026-07-02 |

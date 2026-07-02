@@ -15,18 +15,18 @@
 
 | ID | Stakeholder | Role | Organisation | Contact | Influence | Interest |
 |---|---|---|---|---|---|---|
-| S-01 | Praveen Mittal | AI Solution Architect / Project Lead | [Org] | praveenmittal.com | High | High |
-| S-02 | [Name] | Business Sponsor | [Org] | [Email] | High | High |
-| S-03 | [Name] | Project Manager | [Org] | [Email] | High | High |
-| S-04 | [Name] | Lead Data Scientist | [Org] | [Email] | Medium | High |
-| S-05 | [Name] | MLOps Engineer | [Org] | [Email] | Medium | High |
-| S-06 | [Name] | Software Engineer | [Org] | [Email] | Low | High |
-| S-07 | [Name] | Data Engineer | [Org] | [Email] | Low | High |
-| S-08 | [Name] | Security Lead | [Org] | [Email] | High | Medium |
-| S-09 | [Name] | Compliance Lead | [Org] | [Email] | High | Medium |
-| S-10 | [Name] | Infrastructure Lead | [Org] | [Email] | Medium | Medium |
-| S-11 | [Name] | Operations Lead | [Org] | [Email] | Medium | Medium |
-| S-12 | FREUID Challenge Organisers | Competition Authority | IJCAI-ECAI 2026 | [URL] | High | Low |
+| S-01 | Praveen Mittal | AI Solution Architect / Project Lead | Argus Security Solutions | praveen.mittal@argus.internal | High | High |
+| S-02 | Elena Vance | Business Sponsor | Argus Security Solutions | elena.vance@argus.internal | High | High |
+| S-03 | Marcus Vance | Project Manager | Argus Security Solutions | marcus.vance@argus.internal | High | High |
+| S-04 | Dr. Sarah Chen | Lead Data Scientist | Argus Security Solutions | sarah.chen@argus.internal | Medium | High |
+| S-05 | Alex Mercer | MLOps Engineer | Argus Security Solutions | alex.mercer@argus.internal | Medium | High |
+| S-06 | David Kim | Software Engineer | Argus Security Solutions | david.kim@argus.internal | Low | High |
+| S-07 | Elena Rostova | Data Engineer | Argus Security Solutions | elena.rostova@argus.internal | Low | High |
+| S-08 | Victor Vance | Security Lead | Argus Security Solutions | victor.vance@argus.internal | High | Medium |
+| S-09 | Sofia Rodriguez | Compliance Lead | Argus Security Solutions | sofia.rodriguez@argus.internal | High | Medium |
+| S-10 | Liam O'Connor | Infrastructure Lead | Argus Security Solutions | liam.oconnor@argus.internal | Medium | Medium |
+| S-11 | Tariq Mahmood | Operations Lead | Argus Security Solutions | tariq.mahmood@argus.internal | Medium | Medium |
+| S-12 | FREUID Challenge Organisers | Competition Authority | IJCAI-ECAI 2026 | https://freuid-challenge.github.io | High | Low |
 
 ---
 
