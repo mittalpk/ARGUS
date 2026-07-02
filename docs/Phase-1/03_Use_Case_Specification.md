@@ -5,7 +5,7 @@
 |---|---|
 | **Document ID** | 03_Use_Case_Specification |
 | **Version** | 1.0 |
-| **Status** | Draft |
+| **Status** | Approved |
 | **Author** | Praveen Mittal |
 | **Reviewer** | Project Manager, Lead Data Scientist |
 | **Date Created** | 2026-06-30 |

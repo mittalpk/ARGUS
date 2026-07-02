@@ -5,7 +5,7 @@
 |---|---|
 | **Document ID** | 02_BRD |
 | **Version** | 1.0 |
-| **Status** | Draft |
+| **Status** | Approved |
 | **Author** | Praveen Mittal |
 | **Reviewer** | Project Manager, Compliance Lead |
 | **Date Created** | 2026-06-30 |
@@ -210,6 +210,8 @@ Project ARGUS is a production-grade AI system designed to detect identity docume
 
 ## 10. Sign-Off
 
+| Name | Role | Signature | Date |
+|---|---|---|---|
 | Praveen Mittal | AI Solution Architect | Approved | 2026-06-30 |
 | Project Manager | Project Manager | Approved | 2026-06-30 |
 | Business Sponsor | Business Sponsor | Approved | 2026-06-30 |
