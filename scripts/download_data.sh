@@ -13,11 +13,16 @@ if [ -f .env ]; then
     export $(grep -v '^#' .env | xargs)
 fi
 
+# Map KAGGLE_API_TOKEN to KAGGLE_KEY if provided
+if [ -n "${KAGGLE_API_TOKEN}" ] && [ -z "${KAGGLE_KEY}" ]; then
+    export KAGGLE_KEY="${KAGGLE_API_TOKEN}"
+fi
+
 # 1. Verify Kaggle Credentials (either via env vars or kaggle.json)
 if [ -z "${KAGGLE_USERNAME}" ] || [ -z "${KAGGLE_KEY}" ]; then
     if [ ! -f "${HOME}/.kaggle/kaggle.json" ]; then
         echo "Error: Kaggle API credentials not found."
-        echo "Please configure KAGGLE_USERNAME and KAGGLE_KEY in your .env file or place kaggle.json at ~/.kaggle/."
+        echo "Please configure KAGGLE_USERNAME and KAGGLE_KEY (or KAGGLE_API_TOKEN) in your .env file or place kaggle.json at ~/.kaggle/."
         exit 1
     fi
     # Ensure correct permissions on kaggle credentials if using file fallback
