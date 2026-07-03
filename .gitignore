@@ -21,7 +21,9 @@ __pycache__/
 *.pyd
 
 # Data Directories (Managed by DVC)
-data/
+/data/*
+!/data/**/*.dvc
+!/data/**/.gitignore
 
 # DVC (Data Version Control) Cache and Configuration
 .dvc/cache/

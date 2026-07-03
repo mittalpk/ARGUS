@@ -76,19 +76,24 @@ This backlog is the initial delivery queue for Project ARGUS, seeded from the 14
 **Owner**: Data Engineer  
 **Estimate**: 8 points
 
+**Description**:
+As a Data Engineer, I want to ingest, validate, and split the raw FREUID competition dataset, so that we strip all sensitive EXIF metadata to ensure GDPR compliance and generate deterministic splits for model benchmarking.
+
 **Tasks**:
-- Download competition dataset.
-- Verify file hashes and archive structure.
-- Validate label files and schema.
-- Strip EXIF metadata.
-- Create deterministic splits.
-- Store DVC pointers and dataset hash.
+- Verify system has at least 60 GB free local disk space.
+- Download competition dataset using kagglehub.
+- Verify labels schema contains 'id'/'image_id' and 'label' columns.
+- Strip EXIF metadata and handle various image modes (RGBA, RGB, P).
+- Create stratified splits (70/15/15) using random seed 42.
+- Track dataset splits using DVC (`data/splits.dvc`).
 
 **Acceptance Criteria**:
-- Dataset can be reproduced from DVC version.
-- No corrupt files remain in processed dataset.
-- No image has residual EXIF metadata.
-- Train/val/test splits are disjoint.
+- Ingestion machine has verified disk space before running.
+- 100% of images in processed splits have empty EXIF metadata (verified via PIL `getexif()`).
+- Ingestion fails gracefully and logs errors for zero-byte or unreadable image files.
+- Train/validation/test splits are strictly disjoint (0% overlap) and stratified (maintaining target labels ratio).
+- Dataset splits partition ratio is exactly 70% Train, 15% Validation, 15% Test using random seed 42.
+- Data splits folder is registered in DVC.
 
 ---
 
