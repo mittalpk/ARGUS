@@ -127,17 +127,22 @@ As a Lead Data Scientist, I want to train a baseline EfficientNet-B4 model using
 **Owner**: Lead Data Scientist  
 **Estimate**: 13 points
 
+**Description**:
+As a Lead Data Scientist, I want to train and benchmark ConvNeXt-V2-Base and EVA-02-Large models using Hydra configs, so that we evaluate their individual performance and latency trade-offs against the baseline before combining them into the final ensemble.
+
 **Tasks**:
-- Create configs for each backbone.
-- Train ConvNeXt-V2-Base.
-- Train EVA-02-Large.
-- Benchmark latency for both.
-- Compare metrics to baseline.
+- Implement ConvNeXt-V2-Base and EVA-02-Large model loaders (`src/models/`).
+- Configure automated mixed precision (AMP fp16) for memory optimization of EVA-02-Large.
+- Train both models on the same DVC dataset split version (`US-01`) and log metrics to MLflow.
+- Profile p95 inference latency on target hardware using a single document input (batch size = 1) over 100 iterations.
+- Generate a comparative report comparing metrics and latencies against the baseline in MLflow.
 
 **Acceptance Criteria**:
-- Both models trained and logged.
-- Comparative report produced.
-- Latency and performance trade-offs documented.
+- Both backbones implemented using timm loader.
+- Automated mixed precision configuration verified for EVA-02-Large.
+- Metrics (loss, APCER @ 1% BPCER, AuDET, F1) logged in MLflow.
+- Single-document p95 inference latency profiled and logged.
+- Comparative performance and latency report exported to MLflow.
 
 ---
 
