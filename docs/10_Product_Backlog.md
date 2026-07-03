@@ -102,18 +102,23 @@ As a Data Engineer, I want to ingest, validate, and split the raw FREUID competi
 **Owner**: Lead Data Scientist  
 **Estimate**: 8 points
 
+**Description**:
+As a Lead Data Scientist, I want to train a baseline EfficientNet-B4 model using Hydra configs and MLflow, so that we establish a reproducible, tracked baseline performance benchmark for all future backbone experiments.
+
 **Tasks**:
-- Define baseline config in Hydra.
-- Run first training experiment.
-- Log metrics and artifacts to MLflow.
-- Compute APCER @ 1% BPCER, AuDET, F1.
-- Save checkpoint and model card.
+- Define training parameters and dataset paths using Hydra configs.
+- Implement EfficientNet-B4 model wrapper (`src/models/baseline.py`).
+- Implement metrics module for APCER @ 1% BPCER, AuDET, and F1.
+- Run baseline training loop and log metrics to MLflow (`src/training/train.py`).
+- Implement active CUDA compatibility verification with CPU fallback.
+- Export model checkpoint (`best_model.pth`) and confusion matrix to MLflow.
 
 **Acceptance Criteria**:
-- Training finishes successfully.
-- Metrics are recorded in MLflow.
-- Baseline performance is established.
-- Model is reproducible from config and dataset version.
+- Parameters (epochs, learning rate, seed) are loaded via Hydra configs.
+- Every run logs loss, APCER @ 1% BPCER, AuDET, and F1-score to MLflow.
+- Training exports the best checkpoint (`best_model.pth`) and a confusion matrix plot to MLflow.
+- The script automatically falls back to CPU if a CUDA driver or kernel mismatch is detected.
+- Training runs using the same dataset splits and Hydra seed yield identical metric results.
 
 ---
 
