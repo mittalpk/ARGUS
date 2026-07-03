@@ -361,14 +361,14 @@ Full records in [adr/](adr/). Summary:
 
 ---
 
-## 11. Open Architecture Issues
+## 11. Resolved Architecture Issues
 
-| ID | Issue | Owner | Target Resolution |
-|---|---|---|---|
-| OA-01 | Confirm EVA-02-Large p95 latency on target GPU; determine if fallback weight adjustment is needed | Lead Data Scientist | Phase 3 Sprint 1 |
-| OA-02 | Confirm Kubernetes hosting provider and cluster sizing | Infrastructure Lead | Phase 2 completion |
-| OA-03 | Confirm whether MLflow will be self-hosted or managed | MLOps Engineer | Phase 2 completion |
-| OA-04 | Confirm mTLS tooling — Istio vs. Linkerd vs. cloud-native | Infrastructure Lead | Phase 2 completion |
+| ID | Issue | Resolution / Decision | Status | Owner |
+|---|---|---|---|---|
+| OA-01 | Confirm EVA-02-Large p95 latency on target GPU; determine if fallback weight adjustment is needed | **Resolved**: EVA-02-Large benchmarked on NVIDIA L4 GPU. Latency meets SLO under normal conditions. Dynamic fallback triggers if p95 latency exceeds 600 ms, routing requests to EfficientNet-B4. | Closed | Lead Data Scientist |
+| OA-02 | Confirm Kubernetes hosting provider and cluster sizing | **Resolved**: Selected Google Kubernetes Engine (GKE) Autopilot for managed scaling. Node pools configured with `e2-standard-4` for API pods and `g2-standard-4` (NVIDIA L4) for GPU workers. | Closed | Infrastructure Lead |
+| OA-03 | Confirm whether MLflow will be self-hosted or managed | **Resolved**: Self-hosted MLflow deployed via Helm chart in `argus-monitoring` namespace. Backend metadata stored in Cloud SQL (PostgreSQL); artifacts stored in secure GCS bucket. | Closed | MLOps Engineer |
+| OA-04 | Confirm mTLS tooling — Istio vs. Linkerd vs. cloud-native | **Resolved**: Selected Linkerd as the lightweight service mesh for automatic mTLS encryption and network policy enforcement between pods, minimizing latency overhead. | Closed | Infrastructure Lead |
 
 ---
 
