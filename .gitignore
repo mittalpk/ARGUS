@@ -1,1 +1,40 @@
+# Project ARGUS Gitignore
+
+# Gemini IDE configurations
 .agents/
+
+# Local Environment Credentials
+.env
+
+# Python Virtual Environment
+.venv/
+bin/
+include/
+lib/
+share/
+pyvenv.cfg
+
+# Python Cache & Compiled Files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Data Directories (Managed by DVC)
+data/
+
+# DVC (Data Version Control) Cache and Configuration
+.dvc/cache/
+.dvc/tmp/
+.dvc/local/
+
+# MLflow Experiment Tracking
+mlruns/
+mlflow.db
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints/
+
+# Hydra Config Output
+outputs/
+multirun/
