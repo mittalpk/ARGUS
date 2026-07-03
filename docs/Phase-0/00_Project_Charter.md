@@ -5,7 +5,7 @@
 |---|---|
 | **Document ID** | 00_Project_Charter |
 | **Version** | 1.0 |
-| **Status** | Draft |
+| **Status** | Approved |
 | **Author** | Praveen Mittal |
 | **Reviewer** | Dr. Arthur Pendelton (ARB Chair) / Elena Vance (Business Sponsor) |
 | **Date Created** | 2026-06-30 |

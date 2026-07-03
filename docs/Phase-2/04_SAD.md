@@ -7,7 +7,7 @@
 |---|---|
 | **Document ID** | 04_SAD |
 | **Version** | 1.0 |
-| **Status** | Draft |
+| **Status** | Approved |
 | **Author** | Praveen Mittal |
 | **Reviewer** | ARB, Security Lead, Infrastructure Lead |
 | **Date Created** | 2026-06-30 |

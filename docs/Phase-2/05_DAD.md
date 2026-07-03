@@ -5,7 +5,7 @@
 |---|---|
 | **Document ID** | 05_DAD |
 | **Version** | 1.0 |
-| **Status** | Draft |
+| **Status** | Approved |
 | **Author** | Praveen Mittal |
 | **Reviewer** | Lead Data Scientist, Security Lead, Compliance Lead |
 | **Date Created** | 2026-06-30 |

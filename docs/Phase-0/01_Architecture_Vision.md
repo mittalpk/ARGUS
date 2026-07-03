@@ -7,7 +7,7 @@
 |---|---|
 | **Document ID** | 01_Architecture_Vision |
 | **Version** | 1.0 |
-| **Status** | Draft |
+| **Status** | Approved |
 | **Author** | Praveen Mittal |
 | **Reviewer** | ARB |
 | **Date Created** | 2026-06-30 |
