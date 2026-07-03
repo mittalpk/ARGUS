@@ -1,0 +1,14 @@
+defaults:
+  - model: efficientnet
+  - training: default
+  - _self_
+
+data:
+  splits_dir: "data/splits"
+  batch_size: 16
+  num_workers: 2
+  image_size: 380
+
+mlflow:
+  experiment_name: "ARGUS_Baseline_Training"
+  tracking_uri: "mlruns"
