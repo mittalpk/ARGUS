@@ -236,7 +236,7 @@ This document, combined with the following, constitutes the technical documentat
 | Field | Detail |
 |---|---|
 | Processing Activity | Identity document fraud classification |
-| Controller | [Organisation name] |
+| Controller | Argus Security Solutions |
 | Purpose | Detect fraudulent identity documents for competition and production use |
 | Legal Basis | Legitimate interest / competition participation |
 | Categories of Data | Identity document images (may contain biometric-adjacent data) |

@@ -5,7 +5,7 @@
 |---|---|
 | **Document ID** | 00_Stakeholder_Matrix |
 | **Version** | 1.0 |
-| **Status** | Draft |
+| **Status** | Approved |
 | **Author** | Praveen Mittal |
 | **Last Updated** | 2026-06-30 |
 

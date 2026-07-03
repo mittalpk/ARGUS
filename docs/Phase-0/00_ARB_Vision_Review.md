@@ -7,7 +7,7 @@
 |---|---|
 | **Document ID** | 00_ARB_Vision_Review |
 | **Version** | 1.0 |
-| **Status** | Draft — Pending ARB Review |
+| **Status** | Approved |
 | **Author** | Praveen Mittal |
 | **ARB Chair** | Dr. Arthur Pendelton |
 | **Review Date** | 2026-07-02 |
@@ -42,9 +42,9 @@ This document constitutes the formal presentation pack for the Architecture Revi
 
 | Document | Status | Location |
 |---|---|---|
-| Project Charter | Draft | [00_Project_Charter.md](00_Project_Charter.md) |
-| Architecture Vision | Draft | [01_Architecture_Vision.md](01_Architecture_Vision.md) |
-| Stakeholder Matrix | Draft | [00_Stakeholder_Matrix.md](00_Stakeholder_Matrix.md) |
+| Project Charter | Approved | [00_Project_Charter.md](00_Project_Charter.md) |
+| Architecture Vision | Approved | [01_Architecture_Vision.md](01_Architecture_Vision.md) |
+| Stakeholder Matrix | Approved | [00_Stakeholder_Matrix.md](00_Stakeholder_Matrix.md) |
 | RAID Log | Embedded in Charter | [00_Project_Charter.md](00_Project_Charter.md) |
 
 ---

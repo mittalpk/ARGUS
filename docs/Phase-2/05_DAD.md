@@ -5,7 +5,7 @@
 |---|---|
 | **Document ID** | 05_DAD |
 | **Version** | 1.0 |
-| **Status** | Draft |
+| **Status** | Approved |
 | **Author** | Praveen Mittal |
 | **Reviewer** | Lead Data Scientist, Security Lead, Compliance Lead |
 | **Date Created** | 2026-06-30 |
@@ -161,22 +161,22 @@ All augmentations applied during training only. Validation and test sets receive
 stages:
   ingest:
     cmd: python src/data/ingestion.py
-    deps: [scripts/download_data.sh]
+    deps: [scripts/download_data.sh, src/data/ingestion.py]
     outs: [data/raw/]
 
   validate:
     cmd: python src/data/validate.py
-    deps: [data/raw/]
+    deps: [data/raw/, src/data/validate.py]
     outs: [data/validated/]
 
   preprocess:
     cmd: python src/data/preprocess.py
-    deps: [data/validated/, configs/data/default.yaml]
+    deps: [data/validated/, configs/data/default.yaml, src/data/preprocess.py]
     outs: [data/processed/]
 
   split:
     cmd: python src/data/split.py
-    deps: [data/processed/]
+    deps: [data/processed/, src/data/split.py]
     outs: [data/splits/train/, data/splits/val/, data/splits/test/]
 ```
 
