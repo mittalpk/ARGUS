@@ -1,0 +1,16 @@
+stages:
+  ingest:
+    cmd: python src/data/ingestion.py data/the-freuid-challenge-2026/train/train data/processed data/the-freuid-challenge-2026/train_labels.csv
+    deps:
+      - src/data/ingestion.py
+      - data/the-freuid-challenge-2026/train_labels.csv
+    outs:
+      - data/processed/
+
+  split:
+    cmd: python src/data/split.py data/processed data/splits
+    deps:
+      - src/data/split.py
+      - data/processed/
+    outs:
+      - data/splits/

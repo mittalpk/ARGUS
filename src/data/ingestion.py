@@ -29,6 +29,7 @@ def verify_labels_schema(csv_path: str) -> pd.DataFrame:
 def strip_exif_and_validate_image(src_path: str, dest_path: str) -> bool:
     """
     Verifies image file integrity and saves a clean copy stripped of all EXIF metadata.
+    Handles color conversions (e.g. RGBA/P palette) and transparency checks.
     Returns True if successful, False if image is corrupt or unreadable.
     """
     try:
@@ -41,13 +42,22 @@ def strip_exif_and_validate_image(src_path: str, dest_path: str) -> bool:
             
         # Re-open for writing (verify() closes the file pointer)
         with Image.open(src_path) as img:
-            # Create a brand new image to discard all header metadata (EXIF/JFIF/IPTC)
-            clean_img = Image.new(img.mode, img.size)
-            clean_img.paste(img)
+            mode = img.mode
+            # Handle transparent or palette-based modes
+            if mode in ('RGBA', 'LA') or (mode == 'P' and 'transparency' in img.info):
+                img_conv = img.convert('RGBA')
+                clean_img = Image.new('RGBA', img_conv.size)
+                clean_img.paste(img_conv)
+                dest_format = "PNG"
+            else:
+                img_conv = img.convert('RGB')
+                clean_img = Image.new('RGB', img_conv.size)
+                clean_img.paste(img_conv)
+                dest_format = "JPEG"
             
             # Save the clean copy
             os.makedirs(os.path.dirname(dest_path), exist_ok=True)
-            clean_img.save(dest_path, format="JPEG", quality=95)
+            clean_img.save(dest_path, format=dest_format, quality=95)
             
         return True
     except Exception as e:
@@ -66,11 +76,21 @@ def run_ingestion(raw_dir: str, processed_dir: str, labels_csv: str) -> tuple[pd
     for idx, row in df.iterrows():
         image_name = row['image_id']
         
-        # If 'image_path' column is in original CSV, find relative filename
+        # If 'image_path' column is in original CSV, resolve relative paths robustly
         if 'image_path' in df.columns:
-            filename = os.path.basename(row['image_path'])
-            src_image_path = os.path.join(raw_dir, filename)
-            image_name = filename
+            rel_path = row['image_path']
+            candidate_paths = [
+                os.path.join(raw_dir, rel_path),
+                os.path.join(raw_dir, os.path.basename(rel_path))
+            ]
+            src_image_path = None
+            for p in candidate_paths:
+                if os.path.exists(p):
+                    src_image_path = p
+                    break
+            if src_image_path is None:
+                src_image_path = candidate_paths[0] # Default fallback
+            image_name = rel_path
         else:
             # Handle case where file extension is missing from image_id
             if not image_name.lower().endswith(('.jpg', '.jpeg', '.png')):

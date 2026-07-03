@@ -13,10 +13,21 @@ def create_stratified_splits(
     Splits labels dataframe into train, val, and test partitions deterministically,
     ensuring class distributions are preserved (stratification).
     """
-    if len(df) < 5:
+    if len(df) < 3:
+        # For ultra-small datasets (e.g. 1 or 2 items), train_test_split will fail completely.
+        # We manually split: first item goes to train, second to val, third to test.
+        # This prevents any crash on small datasets.
+        if len(df) == 1:
+            return df, pd.DataFrame(columns=df.columns), pd.DataFrame(columns=df.columns)
+        elif len(df) == 2:
+            return df.iloc[[0]], df.iloc[[1]], pd.DataFrame(columns=df.columns)
+            
+    if len(df) < 10:
         # Fallback for small datasets (e.g. tests) where stratification might fail due to class size
         # We perform simple splits without stratification
         train_df, temp_df = train_test_split(df, test_size=(test_size + val_size), random_state=seed)
+        if len(temp_df) < 2:
+            return train_df, temp_df, pd.DataFrame(columns=df.columns)
         val_df, test_df = train_test_split(temp_df, test_size=0.5, random_state=seed)
         return train_df, val_df, test_df
 
