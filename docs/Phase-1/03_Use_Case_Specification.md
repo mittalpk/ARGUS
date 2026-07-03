@@ -281,7 +281,7 @@ This document defines all use cases, user stories, failure modes, and edge cases
 
 | ID | Story | Acceptance Criteria |
 |---|---|---|
-| US-01 | As a data engineer, I want to ingest the FREUID dataset and verify its integrity so training can begin | Dataset downloaded, schema validated, EXIF stripped, deterministic splits created |
+| US-01 | As a data engineer, I want to ingest the FREUID dataset and verify its integrity so training can begin | EXIF stripped, deterministic splits (70/15/15, seed 42) created, DVC registered |
 | US-02 | As an ML engineer, I want to train a baseline EfficientNet-B4 model so we have an initial performance benchmark | Training completes without error; APCER, AuDET, F1 logged to MLflow |
 | US-03 | As an ML engineer, I want to train EVA-02-Large and ConvNeXt-V2-Base so I can compare backbones | Both models trained; metrics compared in MLflow; no regressions vs. baseline |
 | US-04 | As an MLOps engineer, I want a CI pipeline that runs linting, tests, and model checks on every PR | All gates run automatically; PRs blocked if any gate fails |
