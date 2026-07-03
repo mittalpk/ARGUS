@@ -7,17 +7,22 @@ set -e
 
 echo "=== ARGUS Dataset Acquisition started ==="
 
-# 1. Verify Kaggle Credentials
-if [ ! -f "${HOME}/.kaggle/kaggle.json" ]; then
-    echo "Warning: Kaggle API credentials not found at ~/.kaggle/kaggle.json."
-    echo "Please download your kaggle.json from Kaggle Account settings and place it in ~/.kaggle/."
-    echo "For instructions, visit: https://github.com/Kaggle/kaggle-api"
-    echo "Once credentials are in place, run this script again."
-    exit 1
+# Load credentials from .env if present
+if [ -f .env ]; then
+    echo "Loading credentials from .env..."
+    export $(grep -v '^#' .env | xargs)
 fi
 
-# Ensure correct permissions on kaggle credentials
-chmod 600 "${HOME}/.kaggle/kaggle.json"
+# 1. Verify Kaggle Credentials (either via env vars or kaggle.json)
+if [ -z "${KAGGLE_USERNAME}" ] || [ -z "${KAGGLE_KEY}" ]; then
+    if [ ! -f "${HOME}/.kaggle/kaggle.json" ]; then
+        echo "Error: Kaggle API credentials not found."
+        echo "Please configure KAGGLE_USERNAME and KAGGLE_KEY in your .env file or place kaggle.json at ~/.kaggle/."
+        exit 1
+    fi
+    # Ensure correct permissions on kaggle credentials if using file fallback
+    chmod 600 "${HOME}/.kaggle/kaggle.json"
+fi
 
 # 2. Create Target Directories
 mkdir -p data/
