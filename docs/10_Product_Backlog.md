@@ -102,18 +102,23 @@ As a Data Engineer, I want to ingest, validate, and split the raw FREUID competi
 **Owner**: Lead Data Scientist  
 **Estimate**: 8 points
 
+**Description**:
+As a Lead Data Scientist, I want to train a baseline EfficientNet-B4 model using Hydra configs and MLflow, so that we establish a reproducible, tracked baseline performance benchmark for all future backbone experiments.
+
 **Tasks**:
-- Define baseline config in Hydra.
-- Run first training experiment.
-- Log metrics and artifacts to MLflow.
-- Compute APCER @ 1% BPCER, AuDET, F1.
-- Save checkpoint and model card.
+- Define training parameters and dataset paths using Hydra configs.
+- Implement EfficientNet-B4 model wrapper (`src/models/baseline.py`).
+- Implement metrics module for APCER @ 1% BPCER, AuDET, and F1.
+- Run baseline training loop and log metrics to MLflow (`src/training/train.py`).
+- Implement active CUDA compatibility verification with CPU fallback.
+- Export model checkpoint (`best_model.pth`) and confusion matrix to MLflow.
 
 **Acceptance Criteria**:
-- Training finishes successfully.
-- Metrics are recorded in MLflow.
-- Baseline performance is established.
-- Model is reproducible from config and dataset version.
+- Parameters (epochs, learning rate, seed) are loaded via Hydra configs.
+- Every run logs loss, APCER @ 1% BPCER, AuDET, and F1-score to MLflow.
+- Training exports the best checkpoint (`best_model.pth`) and a confusion matrix plot to MLflow.
+- The script automatically falls back to CPU if a CUDA driver or kernel mismatch is detected.
+- Training runs using the same dataset splits and Hydra seed yield identical metric results.
 
 ---
 
@@ -122,17 +127,22 @@ As a Data Engineer, I want to ingest, validate, and split the raw FREUID competi
 **Owner**: Lead Data Scientist  
 **Estimate**: 13 points
 
+**Description**:
+As a Lead Data Scientist, I want to train and benchmark ConvNeXt-V2-Base and EVA-02-Large models using Hydra configs, so that we evaluate their individual performance and latency trade-offs against the baseline before combining them into the final ensemble.
+
 **Tasks**:
-- Create configs for each backbone.
-- Train ConvNeXt-V2-Base.
-- Train EVA-02-Large.
-- Benchmark latency for both.
-- Compare metrics to baseline.
+- Implement ConvNeXt-V2-Base and EVA-02-Large model loaders (`src/models/`).
+- Configure automated mixed precision (AMP fp16) for memory optimization of EVA-02-Large.
+- Train both models on the same DVC dataset split version (`US-01`) and log metrics to MLflow.
+- Profile p95 inference latency on target hardware using a single document input (batch size = 1) over 100 iterations.
+- Generate a comparative report comparing metrics and latencies against the baseline in MLflow.
 
 **Acceptance Criteria**:
-- Both models trained and logged.
-- Comparative report produced.
-- Latency and performance trade-offs documented.
+- Both backbones implemented using timm loader.
+- Automated mixed precision configuration verified for EVA-02-Large.
+- Metrics (loss, APCER @ 1% BPCER, AuDET, F1) logged in MLflow.
+- Single-document p95 inference latency profiled and logged.
+- Comparative performance and latency report exported to MLflow.
 
 ---
 
@@ -144,14 +154,14 @@ As a Data Engineer, I want to ingest, validate, and split the raw FREUID competi
 **Tasks**:
 - Add ruff lint/format checks.
 - Add pytest unit test job.
-- Add model threshold gate.
+- Add model threshold validation gate.
 - Add dependency and secret scanning.
 - Block PRs on failure.
 
 **Acceptance Criteria**:
-- PR pipeline runs automatically.
-- Failing checks block merge.
-- Model gate validates baseline metrics.
+- PR pipeline runs automatically on every pull request.
+- Failing lint, unit tests, or vulnerability checks block merge.
+- Model gate compares candidate model APCER @ 1% BPCER against the baseline registered model in MLflow and fails if performance degrades by > 2% relative.
 
 ---
 
@@ -162,15 +172,51 @@ As a Data Engineer, I want to ingest, validate, and split the raw FREUID competi
 **Owner**: Lead Data Scientist  
 **Estimate**: 13 points
 
+**Description**:
+As a Lead Data Scientist, I want to combine EfficientNet-B4, ConvNeXt-V2-Base, and EVA-02-Large backbones using learnable weighting, so that we maximize classification accuracy on all attack types.
+
+**Tasks**:
+- Implement softmax-normalized learnable aggregation weights over backbone outputs.
+- Fine-tune ensemble weights on validation set splits.
+- Log validation metrics and comparative charts to MLflow.
+
+**Acceptance Criteria**:
+- Ensemble outperforms the best individual backbone on validation APCER @ 1% BPCER.
+- Inference p95 latency meets the SLA limits.
+
 ### US-06: FastAPI inference endpoint
 **Priority**: P1  
 **Owner**: Software Engineer  
 **Estimate**: 8 points
 
+**Description**:
+As a Developer, I want to create a FastAPI POST `/classify` inference endpoint, so that clients can send document images and receive classification scores and attention maps.
+
+**Tasks**:
+- Create endpoint accepting multipart file uploads.
+- Add input size verification (< 15MB) and format filtering (JPEG/PNG only).
+- Return JSON payload containing `request_id`, `label`, `fraud_score`, `confidence`, and `attention_map` base64 string.
+
+**Acceptance Criteria**:
+- Endpoint returns correct classifications over HTTP.
+- Invalid formats/sizes return HTTP 400 Bad Request with descriptive JSON errors.
+
 ### US-07: Containerized deployment of API
 **Priority**: P1  
 **Owner**: MLOps Engineer  
 **Estimate**: 5 points
+
+**Description**:
+As a Developer, I want to package the FastAPI endpoint into a Docker container, so that it can be deployed consistently across environments.
+
+**Tasks**:
+- Create Dockerfile with multi-stage builds.
+- Integrate vulnerability scanning (Trivy) in the build process.
+- Set container security contexts (non-root user).
+
+**Acceptance Criteria**:
+- Container builds successfully and passes health checks.
+- Trivy scanner blocks the build on any High or Critical vulnerabilities.
 
 ### US-08: Trigger human review for low-confidence predictions
 **Priority**: P1  
@@ -193,30 +239,95 @@ As a Data Engineer, I want to ingest, validate, and split the raw FREUID competi
 **Owner**: MLOps Engineer  
 **Estimate**: 5 points
 
+**Description**:
+As an MLOps Engineer, I want a central model registry in MLflow, so that we version, track, and promote model staging states.
+
+**Tasks**:
+- Configure MLflow model registry backend.
+- Set up permission role configurations for state transition.
+
+**Acceptance Criteria**:
+- Models registered with version counts.
+- Promotion to Staging and Production is restricted to Lead Data Scientist or Project Lead roles.
+
 ### US-10: Monitoring dashboard for production API
 **Priority**: P1  
 **Owner**: MLOps Engineer  
 **Estimate**: 5 points
+
+**Description**:
+As an Operations Lead, I want a Grafana dashboard and Prometheus alerts, so that we monitor API latency and errors in real time.
+
+**Tasks**:
+- Instrument FastAPI endpoint with Prometheus exporters.
+- Build Grafana dashboard showing p95 latency, error rates, and score distributions.
+- Set up alerting rules.
+
+**Acceptance Criteria**:
+- Dashboard updates metrics in real-time.
+- Alerts trigger automatically if p95 latency exceeds 800 ms or error rate > 2% over a 5-minute window.
 
 ### US-11: Structured inference audit logs
 **Priority**: P1  
 **Owner**: Software Engineer  
 **Estimate**: 5 points
 
+**Description**:
+As a Compliance Lead, I want structured JSON inference audit logs, so that we meet EU AI Act requirements.
+
+**Tasks**:
+- Create logging middleware recording metadata.
+- Strip any PII, biometric data, or image base64 blobs from logs.
+
+**Acceptance Criteria**:
+- Every inference request creates a structured log line.
+- Verification check confirms no PII or image binary data exists in log outputs.
+
 ### US-12: Automated drift detection
 **Priority**: P2  
 **Owner**: MLOps Engineer  
 **Estimate**: 3 points
+
+**Description**:
+As an MLOps Engineer, I want daily automated drift detection on prediction distributions, so that we identify data decay early.
+
+**Tasks**:
+- Implement script calculating Population Stability Index (PSI) on prediction scores.
+- Schedule daily cron jobs to analyze logs.
+
+**Acceptance Criteria**:
+- Daily drift calculations run automatically.
+- Alert triggers if PSI value exceeds 0.2.
 
 ### US-13: Automated retraining trigger
 **Priority**: P2  
 **Owner**: Lead Data Scientist  
 **Estimate**: 5 points
 
+**Description**:
+As an ML Engineer, I want an automated retraining pipeline trigger, so that the champion model remains fresh under drift.
+
+**Tasks**:
+- Implement API trigger launching Airflow/GHA workflows.
+- Configure rate-limiting and approval gate overlays.
+
+**Acceptance Criteria**:
+- Retraining pipeline triggers automatically on drift.
+- Execution is restricted to at most once per week, requiring Lead Data Scientist approval before compute starts.
+
 ### US-14: Compliance evidence packaging
 **Priority**: P1  
 **Owner**: MLOps Engineer  
 **Estimate**: 3 points
+
+**Description**:
+As a Compliance Lead, I want an automated script compiling audit evidence, so that we generate regulatory compliance reports on demand.
+
+**Tasks**:
+- Implement packaging script collecting artifacts (DVC hashes, security scan reports, drift logs, model cards).
+
+**Acceptance Criteria**:
+- Packaging script produces a single zipped evidence folder containing all required audit assets.
 
 ---
 

@@ -282,34 +282,34 @@ This document defines all use cases, user stories, failure modes, and edge cases
 | ID | Story | Acceptance Criteria |
 |---|---|---|
 | US-01 | As a data engineer, I want to ingest the FREUID dataset and verify its integrity so training can begin | EXIF stripped, deterministic splits (70/15/15, seed 42) created, DVC registered |
-| US-02 | As an ML engineer, I want to train a baseline EfficientNet-B4 model so we have an initial performance benchmark | Training completes without error; APCER, AuDET, F1 logged to MLflow |
-| US-03 | As an ML engineer, I want to train EVA-02-Large and ConvNeXt-V2-Base so I can compare backbones | Both models trained; metrics compared in MLflow; no regressions vs. baseline |
-| US-04 | As an MLOps engineer, I want a CI pipeline that runs linting, tests, and model checks on every PR | All gates run automatically; PRs blocked if any gate fails |
+| US-02 | As an ML engineer, I want to train a baseline EfficientNet-B4 model so we have an initial performance benchmark | APCER @ 1% BPCER, AuDET, F1 logged in MLflow, best_model.pth artifact saved |
+| US-03 | As an ML engineer, I want to train EVA-02-Large and ConvNeXt-V2-Base so I can compare backbones | Metrics logged in MLflow, p95 latency profiled, comparative report generated |
+| US-04 | As an MLOps engineer, I want a CI pipeline that runs linting, tests, and model checks on every PR | All checks pass; model gate fails PR if performance degrades by > 2% relative to registered model |
 
 ### Must Have (Phase 3 Sprint 3–4)
 
 | ID | Story | Acceptance Criteria |
 |---|---|---|
-| US-05 | As an ML engineer, I want an ensemble model combining all three backbones so accuracy is maximised | Ensemble outperforms best individual backbone on APCER @ 1% BPCER |
-| US-06 | As a developer, I want a FastAPI inference endpoint so the model can be called over HTTP | POST `/classify` accepts image, returns JSON with result, score, confidence, request_id |
-| US-07 | As a developer, I want the API packaged as a Docker container so it can be deployed consistently | Container builds, passes scan, starts, and serves `/health` and `/classify` correctly |
-| US-08 | As an ML engineer, I want confidence scores and attention maps returned so low-confidence cases can be reviewed | Every response includes `confidence` and `attention_map` URL or base64 |
+| US-05 | As an ML engineer, I want an ensemble model combining all three backbones so accuracy is maximised | Ensemble outperforms individual backbones on APCER @ 1% BPCER; meets latency SLA |
+| US-06 | As a developer, I want a FastAPI inference endpoint so the model can be called over HTTP | Classification HTTP POST returns scores/maps; invalid payloads return HTTP 400 |
+| US-07 | As a developer, I want the API packaged as a Docker container so it can be deployed consistently | Container passes health check; build fails on High/Critical Trivy scanner alerts |
+| US-08 | As an ML engineer, I want confidence scores and attention maps returned so low-confidence cases can be reviewed | Reviews triggered for confidence < 0.70; response payload contains scores and maps |
 
 ### Should Have (Phase 3 Sprint 5)
 
 | ID | Story | Acceptance Criteria |
 |---|---|---|
-| US-09 | As an MLOps engineer, I want a model registry so I can track and promote model versions | Models registered in MLflow with status lifecycle: staging → approved → production |
-| US-10 | As an operations lead, I want Prometheus metrics and a Grafana dashboard so I can monitor the API in production | Dashboard shows p95 latency, error rate, throughput, and fraud score distribution |
-| US-11 | As a compliance lead, I want structured inference audit logs so I can satisfy EU AI Act logging requirements | Every request logged with request_id, timestamp, result, score, model version |
-| US-14 | As a compliance lead, I want compliance evidence packaging so I can compile regulatory audit evidence | Audit evidence pack can be generated on demand |
+| US-09 | As an MLOps engineer, I want a model registry so I can track and promote model versions | State transitions logged in registry; promotions restricted to Lead Data Scientist/Project Lead |
+| US-10 | As an operations lead, I want Prometheus metrics and a Grafana dashboard so I can monitor the API in production | Real-time stats; alerts fire if p95 latency > 800 ms or error rate > 2% over 5m |
+| US-11 | As a compliance lead, I want structured inference audit logs so I can satisfy EU AI Act logging requirements | Audit logs record metadata; check verifies no PII or image binary logs exist |
+| US-14 | As a compliance lead, I want compliance evidence packaging so I can compile regulatory audit evidence | Auditable evidence folder compiled containing all required registry assets |
 
 ### Could Have (Phase 5)
 
 | ID | Story | Acceptance Criteria |
 |---|---|---|
-| US-12 | As an MLOps engineer, I want automated drift detection so model degradation is caught early | Daily drift job runs; alert fired when threshold exceeded |
-| US-13 | As an ML engineer, I want an automated retraining trigger so the champion model stays current | Retraining pipeline launches automatically when drift or performance criteria met |
+| US-12 | As an MLOps engineer, I want automated drift detection so model degradation is caught early | Daily PSI drift metrics calculated; alert fires when PSI > 0.2 |
+| US-13 | As an ML engineer, I want an automated retraining trigger so the champion model stays current | Retraining triggers on drift; rate-limited to 1/week; requires Lead Data Scientist approval |
 
 ---
 
