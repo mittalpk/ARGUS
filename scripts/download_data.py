@@ -5,6 +5,7 @@
 
 import os
 import shutil
+import kagglehub
 from dotenv import load_dotenv
 
 # Load env variables from .env
@@ -20,8 +21,6 @@ if not os.environ.get("KAGGLE_USERNAME") or not os.environ.get("KAGGLE_KEY"):
     print("Please set KAGGLE_USERNAME and KAGGLE_KEY / KAGGLE_API_TOKEN.")
     exit(1)
 
-import kagglehub
-
 print("Downloading dataset using kagglehub...")
 COMPETITION_NAME = "the-freuid-challenge-2026-ijcai-ecai"
 
@@ -31,7 +30,7 @@ try:
 
     target_dir = "data/the-freuid-challenge-2026"
     os.makedirs("data", exist_ok=True)
-    
+
     if os.path.exists(target_dir):
         print(f"Removing old target directory {target_dir}...")
         shutil.rmtree(target_dir)

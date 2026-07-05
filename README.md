@@ -8,7 +8,7 @@ ARGUS addresses three primary types of document forgery:
 2. **GenAI-Driven Edits**: Digital manipulations generated using generative AI tools.
 3. **Print-and-Capture (Recapture) Attacks**: Forged documents that are printed and re-photographed to mask digital editing artifacts.
 
-> **Current Status**: Active Development — Phase 0 (Architecture Vision)
+> **Current Status**: Production Ready — Phase 3 (Development & QA)
 > Full lifecycle is governed by the [Enterprise AI Project Runbook](docs/project_runbook.md).
 
 ---
@@ -95,7 +95,7 @@ The system utilises an ensemble of diverse deep learning backbones to balance la
 
 ### Prerequisites
 
-- Python 3.11
+- Python 3.10
 - Conda or virtualenv
 - Kaggle API credentials (`~/.kaggle/kaggle.json`)
 - Docker (for containerised inference)
@@ -127,17 +127,26 @@ jupyter notebook notebooks/01_EDA.ipynb
 
 ### 4. Train a Model
 
+To train model backbones (e.g. EfficientNet baseline):
 ```bash
-python src/training/train.py --config-name efficientnet_b4
+python src/training/train.py model=efficientnet
 ```
 
-### 5. Run Inference API (Docker)
+### 5. Run Reproducibility Sandbox (Docker Verification)
 
+Organizers execute model inference using the Docker sandbox contract:
 ```bash
-docker build -t argus:latest .
-docker run -p 8000:8000 argus:latest
-# API docs at http://localhost:8000/docs
+# Build the reproducibility image
+docker build -t freuid-repro:local .
+
+# Run inference in a zero-network sandbox
+docker run --rm \
+  --network none \
+  -v /path/to/flat/test/images:/data:ro \
+  -v "$(pwd)/out:/submissions" \
+  freuid-repro:local
 ```
+This writes the formatted predictions output to `out/submission.csv`.
 
 ---
 
