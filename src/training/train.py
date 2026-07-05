@@ -150,7 +150,12 @@ def main(cfg: DictConfig):
     logger.info(f"p95 Inference Latency: {p95_latency:.2f} ms")
     
     # Start MLflow run
-    with mlflow.start_run(run_name=f"{cfg.model.name}_run"):
+    with mlflow.start_run(run_name=f"{cfg.model.name}_run") as active_run:
+        # Save run ID to local file for CI/CD gates
+        run_id = active_run.info.run_id
+        with open("latest_run_id.txt", "w") as f:
+            f.write(run_id)
+            
         # Log parameters
         mlflow.log_param("model_name", cfg.model.name)
         mlflow.log_param("lr", cfg.training.lr)

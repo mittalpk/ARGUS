@@ -87,6 +87,7 @@ def save_splits(
             dest_path = os.path.join(part_dir, image_name)
             
             if os.path.exists(src_path):
+                os.makedirs(os.path.dirname(dest_path), exist_ok=True)
                 shutil.copy2(src_path, dest_path)
             else:
                 logger.warning(f"Warning: Image {src_path} listed in labels but not found.")
