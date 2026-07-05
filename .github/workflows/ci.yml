@@ -1,0 +1,64 @@
+name: ARGUS CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint:
+    name: Code Style and Quality Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install Ruff
+        run: pip install ruff
+
+      - name: Run Ruff Linter
+        run: ruff check .
+
+      - name: Run Ruff Formatter
+        run: ruff format --check .
+
+  test:
+    name: Unit Testing and Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest setuptools==69.5.1
+
+      - name: Run Unit Tests
+        run: |
+          PYTHONPATH=. pytest tests/unit/
+
+      - name: Dry-run Model Gate Verification
+        run: |
+          # Create a dummy MLflow experiment and run to verify gate check script works
+          PYTHONPATH=. python -c "
+          import mlflow
+          mlflow.set_tracking_uri('mlruns')
+          with mlflow.start_run() as r:
+              mlflow.log_metric('val_apcer_at_1percent_bpcer', 0.05)
+              print(r.info.run_id)
+          " > dummy_run_id.txt
+          CANDIDATE_RUN_ID=$(cat dummy_run_id.txt | tail -n 1 | tr -d ' ')
+          PYTHONPATH=. python scripts/check_model_gate.py --candidate_run_id $CANDIDATE_RUN_ID
