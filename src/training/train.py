@@ -252,7 +252,7 @@ def main(cfg: DictConfig):
             audet = compute_audet(all_labels, all_probs)
 
             logger.info(
-                f"Epoch {epoch+1}/{cfg.training.epochs} - Train Loss: {train_loss:.4f} - Val Loss: {val_loss:.4f} - APCER@1%BPCER: {apcer:.4f} - AuDET: {audet:.4f}"
+                f"Epoch {epoch + 1}/{cfg.training.epochs} - Train Loss: {train_loss:.4f} - Val Loss: {val_loss:.4f} - APCER@1%BPCER: {apcer:.4f} - AuDET: {audet:.4f}"
             )
 
             # Log metrics to MLflow
