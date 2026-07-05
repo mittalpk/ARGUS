@@ -1,6 +1,10 @@
 import os
+import logging
 import pandas as pd
 from PIL import Image
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 def verify_labels_schema(csv_path: str) -> pd.DataFrame:
     """
@@ -61,7 +65,7 @@ def strip_exif_and_validate_image(src_path: str, dest_path: str) -> bool:
             
         return True
     except Exception as e:
-        print(f"Failed to process image {src_path}: {e}")
+        logger.error(f"Failed to process image {src_path}: {e}")
         return False
 
 def run_ingestion(raw_dir: str, processed_dir: str, labels_csv: str) -> tuple[pd.DataFrame, list[str]]:
@@ -119,9 +123,9 @@ def run_ingestion(raw_dir: str, processed_dir: str, labels_csv: str) -> tuple[pd
 if __name__ == "__main__":
     import sys
     if len(sys.argv) < 4:
-        print("Usage: python ingestion.py <raw_dir> <processed_dir> <labels_csv>")
+        logger.error("Usage: python ingestion.py <raw_dir> <processed_dir> <labels_csv>")
         sys.exit(1)
     
     raw, proc, csv = sys.argv[1], sys.argv[2], sys.argv[3]
     df, fails = run_ingestion(raw, proc, csv)
-    print(f"Ingestion complete. Successfully processed: {len(df)} images. Failed/Corrupt: {len(fails)}")
+    logger.info(f"Ingestion complete. Successfully processed: {len(df)} images. Failed/Corrupt: {len(fails)}")

@@ -1,7 +1,11 @@
 import os
 import shutil
+import logging
 import pandas as pd
 from sklearn.model_selection import train_test_split
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 def create_stratified_splits(
     df: pd.DataFrame, 
@@ -85,7 +89,7 @@ def save_splits(
             if os.path.exists(src_path):
                 shutil.copy2(src_path, dest_path)
             else:
-                print(f"Warning: Image {src_path} listed in labels but not found.")
+                logger.warning(f"Warning: Image {src_path} listed in labels but not found.")
 
 def run_splitting(processed_dir: str, output_dir: str, seed: int = 42) -> tuple[int, int, int]:
     labels_path = os.path.join(processed_dir, "labels.csv")
@@ -103,9 +107,9 @@ def run_splitting(processed_dir: str, output_dir: str, seed: int = 42) -> tuple[
 if __name__ == "__main__":
     import sys
     if len(sys.argv) < 3:
-        print("Usage: python split.py <processed_dir> <output_dir>")
+        logger.error("Usage: python split.py <processed_dir> <output_dir>")
         sys.exit(1)
         
     proc, out = sys.argv[1], sys.argv[2]
     tr, va, te = run_splitting(proc, out)
-    print(f"Splitting complete. Train: {tr}, Val: {va}, Test: {te}")
+    logger.info(f"Splitting complete. Train: {tr}, Val: {va}, Test: {te}")

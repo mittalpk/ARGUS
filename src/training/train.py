@@ -1,7 +1,11 @@
 import os
 import random
+import logging
 import numpy as np
 import pandas as pd
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
@@ -107,6 +111,13 @@ def main(cfg: DictConfig):
     train_dataset = ARGUSDataset(train_csv, os.path.join(cfg.data.splits_dir, "train"), transform=train_transform)
     val_dataset = ARGUSDataset(val_csv, os.path.join(cfg.data.splits_dir, "val"), transform=val_transform)
     
+    # Safeguard against empty dataset partitions
+    if len(train_dataset) == 0 or len(val_dataset) == 0:
+        raise ValueError(
+            f"Dataset partition check failed. Train size: {len(train_dataset)}, "
+            f"Val size: {len(val_dataset)}. Partitions must contain at least 1 image."
+        )
+    
     train_loader = DataLoader(train_dataset, batch_size=cfg.data.batch_size, shuffle=True, num_workers=cfg.data.num_workers)
     val_loader = DataLoader(val_dataset, batch_size=cfg.data.batch_size, shuffle=False, num_workers=cfg.data.num_workers)
     
@@ -119,11 +130,11 @@ def main(cfg: DictConfig):
             test_layer = torch.nn.Conv2d(3, 3, 3).to(device)
             test_layer(test_tensor)
         except Exception as e:
-            print(f"Warning: CUDA is available but incompatible with PyTorch binary: {e}")
-            print("Falling back to CPU mode.")
+            logger.warning(f"Warning: CUDA is available but incompatible with PyTorch binary: {e}")
+            logger.warning("Falling back to CPU mode.")
             device = torch.device("cpu")
             
-    print(f"Using device: {device}")
+    logger.info(f"Using device: {device}")
     
     model = ARGUSBackbone(model_name=cfg.model.name, pretrained=cfg.model.pretrained, drop_rate=cfg.model.drop_rate)
     model.to(device)
@@ -136,10 +147,10 @@ def main(cfg: DictConfig):
     
     # Run latency profiling benchmark
     p95_latency = profile_p95_latency(model, device, image_size)
-    print(f"p95 Inference Latency: {p95_latency:.2f} ms")
+    logger.info(f"p95 Inference Latency: {p95_latency:.2f} ms")
     
     # Start MLflow run
-    with mlflow.start_run():
+    with mlflow.start_run(run_name=f"{cfg.model.name}_run"):
         # Log parameters
         mlflow.log_param("model_name", cfg.model.name)
         mlflow.log_param("lr", cfg.training.lr)
@@ -200,7 +211,7 @@ def main(cfg: DictConfig):
             apcer, bpcer, opt_threshold = compute_apcer_at_target_bpcer(all_labels, all_probs, target_bpcer=0.01)
             audet = compute_audet(all_labels, all_probs)
             
-            print(f"Epoch {epoch+1}/{cfg.training.epochs} - Train Loss: {train_loss:.4f} - Val Loss: {val_loss:.4f} - APCER@1%BPCER: {apcer:.4f} - AuDET: {audet:.4f}")
+            logger.info(f"Epoch {epoch+1}/{cfg.training.epochs} - Train Loss: {train_loss:.4f} - Val Loss: {val_loss:.4f} - APCER@1%BPCER: {apcer:.4f} - AuDET: {audet:.4f}")
             
             # Log metrics to MLflow
             mlflow.log_metric("train_loss", train_loss, step=epoch)
@@ -214,7 +225,7 @@ def main(cfg: DictConfig):
                 checkpoint_path = f"best_{cfg.model.name}.pth"
                 torch.save(model.state_dict(), checkpoint_path)
                 mlflow.log_artifact(checkpoint_path)
-                print(f"Saved best model checkpoint with APCER: {apcer:.4f}")
+                logger.info(f"Saved best model checkpoint with APCER: {apcer:.4f}")
                 
 if __name__ == "__main__":
     main()
