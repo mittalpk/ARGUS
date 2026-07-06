@@ -4,7 +4,7 @@ FROM python:3.10-slim
 # Install system dependencies required for OpenCV, Pillow, and system utilities
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
-    libgl1-mesa-glx \
+    libgl1 \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
@@ -20,7 +20,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 # Run dummy instantiation during build phase to cache model structures and weights inside the image
 # This ensures zero internet access is required during runtime (offline sandbox compliance)
-RUN python -c "import timm; timm.create_model('convnextv2_base', pretrained=True); timm.create_model('eva02_large_patch14_448', pretrained=True)"
+RUN python -c "import timm; timm.create_model('efficientnet_b4', pretrained=True); timm.create_model('convnextv2_base', pretrained=True); timm.create_model('eva02_large_patch14_448', pretrained=True)"
 
 # Copy model architecture wrapper and core source code
 COPY src/ /app/src/

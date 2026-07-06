@@ -150,6 +150,34 @@ This writes the formatted predictions output to `out/submission.csv`.
 
 ---
 
+## Safe Local Development (WSL & Docker)
+
+When running heavy transformer architectures (like EVA-02-Large) locally inside Windows Subsystem for Linux (WSL), virtual memory exhaustion can cause WSL or the Windows host to freeze.
+
+To safeguard your environment:
+
+### 1. Limit WSL Memory Consumption
+Create your Windows-side `.wslconfig` file (located at `C:\Users\<YourUsername>\.wslconfig`). If the file does not exist in that directory, create it as a new text file (make sure to remove any trailing `.txt` extension so it is named exactly `.wslconfig`):
+```ini
+[wsl2]
+memory=12GB       # Restrict WSL to 12GB of RAM (adjust based on host capacity)
+swap=4GB          # Configure swap space
+localhostForwarding=true
+```
+After saving, restart WSL from PowerShell: `wsl --shutdown`.
+
+### 2. Run Tests inside Docker
+Always execute unit and integration tests inside a container sandbox rather than raw WSL shell. This bounds resource limits and guarantees environment consistency:
+```bash
+# Build the test image
+docker build -t argus-test:local .
+
+# Execute pytest inside the container using host volume mounts
+docker run --rm -v "$(pwd):/app" --entrypoint pytest argus-test:local tests/unit/
+```
+
+---
+
 ## Development Workflow
 
 This project follows a trunk-based development model:
