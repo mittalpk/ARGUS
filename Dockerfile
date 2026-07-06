@@ -40,22 +40,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy installed Python packages from builder stage
-COPY --from=builder /root/.local /home/argus/.local
-COPY --from=builder /home/argus/.cache /home/argus/.cache
+# Copy installed Python packages from builder stage with correct ownership
+COPY --from=builder --chown=argus:argus /root/.local /home/argus/.local
+COPY --from=builder --chown=argus:argus /home/argus/.cache /home/argus/.cache
 
-# Copy application code
+# Copy application code with correct ownership
 WORKDIR /app
-COPY src/ /app/src/
-COPY prepare_submission.py /app/
+COPY --chown=argus:argus src/ /app/src/
+COPY --chown=argus:argus prepare_submission.py /app/
 
 # Set env path variables for the non-root user local packages
 ENV PATH=/home/argus/.local/bin:$PATH
 ENV HF_HOME=/home/argus/.cache/huggingface
 ENV TORCH_HOME=/home/argus/.cache/torch
-
-# Change ownership of app and cache to non-root user
-RUN chown -R argus:argus /app /home/argus
 
 # Switch to non-root user security context
 USER argus
