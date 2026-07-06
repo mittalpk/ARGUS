@@ -84,14 +84,14 @@ def health_check():
 
 
 @app.post("/classify", response_model=ClassificationResponse)
-async def classify_image(
+def classify_image(
     file: UploadFile = File(...), x_request_id: str = Header(None, alias="X-Request-ID")
 ):
     start_time = time.perf_counter()
     req_id = x_request_id or str(uuid.uuid4())
 
-    # Read binary content
-    content = await file.read()
+    # Read binary content synchronously to utilize threadpool concurrency
+    content = file.file.read()
     content_len = len(content)
 
     # 1. Size Validation (< 15MB)
@@ -139,8 +139,8 @@ async def classify_image(
 
     # Inference execution block
     try:
-        # Zero model gradients to prevent leakage
-        model.zero_grad()
+        # Zero model gradients to prevent leakage and optimize memory cleanup
+        model.zero_grad(set_to_none=True)
 
         # Forward pass
         outputs = model(input_tensor)
