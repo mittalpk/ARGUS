@@ -62,3 +62,38 @@ jobs:
           " > dummy_run_id.txt
           CANDIDATE_RUN_ID=$(cat dummy_run_id.txt | tail -n 1 | tr -d ' ')
           PYTHONPATH=. python scripts/check_model_gate.py --candidate_run_id $CANDIDATE_RUN_ID
+
+  docker-build-and-scan:
+    name: Container Build and Vulnerability Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Free Disk Space (Cleanup Runner)
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile
+          tags: argus-api:latest
+          outputs: type=docker,dest=/tmp/image.tar
+
+      - name: Run Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          input: /tmp/image.tar
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os'
+          severity: 'HIGH,CRITICAL'

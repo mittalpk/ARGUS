@@ -1,11 +1,11 @@
-# Dockerfile for FREUID Challenge 2026 Reproducibility Package
-FROM python:3.10-slim
+# ==========================================
+# Stage 1: Builder
+# ==========================================
+FROM python:3.10-slim AS builder
 
-# Install system dependencies required for OpenCV, Pillow, and system utilities
+# Install system dependencies required for building wheels
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
-    libgl1 \
-    libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
 # Set up working directory
@@ -14,17 +14,55 @@ WORKDIR /app
 # Copy dependency definition
 COPY requirements.txt .
 
-# Upgrade pip and install package requirements
+# Upgrade pip and install requirements
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir --user -r requirements.txt
 
-# Run dummy instantiation during build phase to cache model structures and weights inside the image
-# This ensures zero internet access is required during runtime (offline sandbox compliance)
+# Pre-cache pretrained model weights in argus home cache directory
+ENV HF_HOME=/home/argus/.cache/huggingface
+ENV TORCH_HOME=/home/argus/.cache/torch
+RUN mkdir -p /home/argus/.cache/huggingface /home/argus/.cache/torch
+
 RUN python -c "import timm; timm.create_model('efficientnet_b4', pretrained=True); timm.create_model('convnextv2_base', pretrained=True); timm.create_model('eva02_large_patch14_448', pretrained=True)"
 
-# Copy model architecture wrapper and core source code
-COPY src/ /app/src/
-COPY prepare_submission.py /app/
+# ==========================================
+# Stage 2: Runner
+# ==========================================
+FROM python:3.10-slim AS runner
 
-# Entry point triggers submission file preparation
-ENTRYPOINT ["python", "prepare_submission.py"]
+# Create non-root system user and group
+RUN groupadd -g 10001 argus && \
+    useradd -u 10001 -g argus -m -s /sbin/nologin argus
+
+# Install system dependencies required for OpenCV, Pillow, and system utilities
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgl1 \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy installed Python packages from builder stage with correct ownership
+COPY --from=builder --chown=argus:argus /root/.local /home/argus/.local
+COPY --from=builder --chown=argus:argus /home/argus/.cache /home/argus/.cache
+
+# Copy application code with correct ownership
+WORKDIR /app
+COPY --chown=argus:argus src/ /app/src/
+COPY --chown=argus:argus prepare_submission.py /app/
+
+# Set env path variables for the non-root user local packages
+ENV PATH=/home/argus/.local/bin:$PATH
+ENV HF_HOME=/home/argus/.cache/huggingface
+ENV TORCH_HOME=/home/argus/.cache/torch
+
+# Switch to non-root user security context
+USER argus
+
+# Expose FastAPI API port
+EXPOSE 8000
+
+# Docker Healthcheck utilizing python's built-in urllib
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
+
+# Start the FastAPI application using uvicorn
+CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
