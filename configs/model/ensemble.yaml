@@ -1,0 +1,6 @@
+name: "ensemble"
+pretrained: true
+drop_rate: 0.2
+image_size: 448
+use_amp: true
+freeze_backbones: true

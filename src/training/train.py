@@ -13,6 +13,7 @@ import hydra
 from omegaconf import DictConfig
 import mlflow
 from src.models.baseline import ARGUSBackbone
+from src.models.ensemble import ARGUSEnsemble
 from src.training.metrics import compute_apcer_at_target_bpcer, compute_audet
 
 logger = logging.getLogger(__name__)
@@ -163,11 +164,15 @@ def main(cfg: DictConfig):
 
     logger.info(f"Using device: {device}")
 
-    model = ARGUSBackbone(
-        model_name=cfg.model.name,
-        pretrained=cfg.model.pretrained,
-        drop_rate=cfg.model.drop_rate,
-    )
+    if cfg.model.name == "ensemble":
+        freeze = cfg.model.get("freeze_backbones", False)
+        model = ARGUSEnsemble(pretrained=cfg.model.pretrained, freeze_backbones=freeze)
+    else:
+        model = ARGUSBackbone(
+            model_name=cfg.model.name,
+            pretrained=cfg.model.pretrained,
+            drop_rate=cfg.model.drop_rate,
+        )
     model.to(device)
 
     criterion = nn.BCEWithLogitsLoss()
@@ -260,6 +265,17 @@ def main(cfg: DictConfig):
             mlflow.log_metric("val_loss", val_loss, step=epoch)
             mlflow.log_metric("val_apcer_at_1percent_bpcer", apcer, step=epoch)
             mlflow.log_metric("val_audet", audet, step=epoch)
+
+            # Log learnable weights if ensemble is used
+            if cfg.model.name == "ensemble":
+                weights_val = torch.softmax(model.weights, dim=0).detach().cpu().numpy()
+                logger.info(
+                    f"Ensemble Aggregation Weights: EffNet={weights_val[0]:.4f}, "
+                    f"ConvNeXt={weights_val[1]:.4f}, EVA={weights_val[2]:.4f}"
+                )
+                mlflow.log_metric("weight_effnet", float(weights_val[0]), step=epoch)
+                mlflow.log_metric("weight_convnext", float(weights_val[1]), step=epoch)
+                mlflow.log_metric("weight_eva", float(weights_val[2]), step=epoch)
 
             # Save champion checkpoint
             if apcer < best_val_apcer:
