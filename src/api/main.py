@@ -6,6 +6,7 @@ import base64
 import logging
 import json
 import asyncio
+from contextlib import asynccontextmanager
 import numpy as np
 import torch
 import albumentations as A
@@ -23,8 +24,6 @@ logging.basicConfig(
     level=logging.INFO,
     format='{"timestamp": "%(asctime)s", "level": "%(levelname)s", "message": %(message)s}',
 )
-
-app = FastAPI(title="ARGUS Identity Verification API", version="1.3.0")
 
 # 1. Ephemeral Secure Storage Configuration
 HUMAN_REVIEW_ENCRYPTION_KEY = os.getenv("HUMAN_REVIEW_ENCRYPTION_KEY", None)
@@ -62,9 +61,22 @@ async def clean_expired_human_review_payloads():
         await asyncio.sleep(3600)
 
 
-@app.on_event("startup")
-async def startup_event():
-    asyncio.create_task(clean_expired_human_review_payloads())
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Start the background cleanup task
+    cleanup_task = asyncio.create_task(clean_expired_human_review_payloads())
+    yield
+    # Shutdown: Clean up task execution context
+    cleanup_task.cancel()
+    try:
+        await cleanup_task
+    except asyncio.CancelledError:
+        pass
+
+
+app = FastAPI(
+    title="ARGUS Identity Verification API", version="1.3.0", lifespan=lifespan
+)
 
 
 # Load model configuration from environment or fallback defaults
