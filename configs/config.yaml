@@ -11,4 +11,5 @@ data:
 
 mlflow:
   experiment_name: "ARGUS_Baseline_Training"
-  tracking_uri: "mlruns"
+  tracking_uri: "sqlite:///mlflow.db"
+  registered_model_name: "ARGUS_Classifier"

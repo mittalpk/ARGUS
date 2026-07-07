@@ -12,6 +12,7 @@ from albumentations.pytorch import ToTensorV2
 import hydra
 from omegaconf import DictConfig
 import mlflow
+import mlflow.pytorch
 from src.models.baseline import ARGUSBackbone
 from src.models.ensemble import ARGUSEnsemble
 from src.training.metrics import compute_apcer_at_target_bpcer, compute_audet
@@ -204,6 +205,7 @@ def main(cfg: DictConfig):
         mlflow.log_metric("p95_latency_ms", p95_latency)
 
         best_val_apcer = 1.0
+        checkpoint_path = None
 
         for epoch in range(cfg.training.epochs):
             model.train()
@@ -284,6 +286,18 @@ def main(cfg: DictConfig):
                 torch.save(model.state_dict(), checkpoint_path)
                 mlflow.log_artifact(checkpoint_path)
                 logger.info(f"Saved best model checkpoint with APCER: {apcer:.4f}")
+
+        # Register model to the Model Registry
+        if checkpoint_path and os.path.exists(checkpoint_path):
+            logger.info(
+                f"Registering model version '{cfg.mlflow.registered_model_name}' to MLflow Model Registry..."
+            )
+            model.load_state_dict(torch.load(checkpoint_path, map_location=device))
+            mlflow.pytorch.log_model(
+                pytorch_model=model,
+                artifact_path="model",
+                registered_model_name=cfg.mlflow.registered_model_name,
+            )
 
 
 if __name__ == "__main__":
