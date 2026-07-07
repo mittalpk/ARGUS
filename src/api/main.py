@@ -4,6 +4,9 @@ import time
 import uuid
 import base64
 import logging
+import json
+import asyncio
+from contextlib import asynccontextmanager
 import numpy as np
 import torch
 import albumentations as A
@@ -11,6 +14,7 @@ from albumentations.pytorch import ToTensorV2
 from PIL import Image
 from fastapi import FastAPI, File, UploadFile, Header, HTTPException
 from pydantic import BaseModel
+from cryptography.fernet import Fernet
 from src.models.baseline import ARGUSBackbone
 from src.models.ensemble import ARGUSEnsemble
 
@@ -21,7 +25,59 @@ logging.basicConfig(
     format='{"timestamp": "%(asctime)s", "level": "%(levelname)s", "message": %(message)s}',
 )
 
-app = FastAPI(title="ARGUS Identity Verification API", version="1.3.0")
+# 1. Ephemeral Secure Storage Configuration
+HUMAN_REVIEW_ENCRYPTION_KEY = os.getenv("HUMAN_REVIEW_ENCRYPTION_KEY", None)
+if not HUMAN_REVIEW_ENCRYPTION_KEY:
+    HUMAN_REVIEW_ENCRYPTION_KEY = Fernet.generate_key().decode()
+    logger.warning(
+        '"HUMAN_REVIEW_ENCRYPTION_KEY is not set. Generated a dynamic key for runtime secure storage."'
+    )
+fernet = Fernet(HUMAN_REVIEW_ENCRYPTION_KEY.encode())
+
+HUMAN_REVIEW_DIR = os.getenv("HUMAN_REVIEW_DIR", "/tmp/human_review")
+os.makedirs(HUMAN_REVIEW_DIR, exist_ok=True)
+
+
+# 2. Strict 24-Hour TTL Background Task
+async def clean_expired_human_review_payloads():
+    while True:
+        try:
+            now = time.time()
+            count = 0
+            for f in os.listdir(HUMAN_REVIEW_DIR):
+                if f.endswith(".enc"):
+                    fp = os.path.join(HUMAN_REVIEW_DIR, f)
+                    # 24 hours = 86400 seconds
+                    if now - os.path.getmtime(fp) > 86400:
+                        os.remove(fp)
+                        count += 1
+            if count > 0:
+                logger.info(
+                    f'"Cleaned up {count} expired human review payloads (strict 24h TTL)"'
+                )
+        except Exception as e:
+            logger.error(f'"Error in human review TTL cleanup daemon: {e}"')
+        # Check every hour
+        await asyncio.sleep(3600)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Start the background cleanup task
+    cleanup_task = asyncio.create_task(clean_expired_human_review_payloads())
+    yield
+    # Shutdown: Clean up task execution context
+    cleanup_task.cancel()
+    try:
+        await cleanup_task
+    except asyncio.CancelledError:
+        pass
+
+
+app = FastAPI(
+    title="ARGUS Identity Verification API", version="1.3.0", lifespan=lifespan
+)
+
 
 # Load model configuration from environment or fallback defaults
 MODEL_NAME = os.getenv("MODEL_NAME", "ensemble")
@@ -171,7 +227,33 @@ def classify_image(
 
         # Confidence score scaling (0.0 to 1.0)
         confidence = float(abs(fraud_score - 0.5) * 2.0)
-        requires_human_review = True if confidence < 0.70 else False
+
+        # Trigger human review for confidence < 0.70 OR ambiguous fraud scores (0.40 - 0.60)
+        requires_human_review = (
+            True if (confidence < 0.70 or 0.40 <= fraud_score <= 0.60) else False
+        )
+
+        # Route payload to temporary secure storage if human review is required
+        if requires_human_review:
+            try:
+                review_payload = {
+                    "request_id": req_id,
+                    "fraud_score": fraud_score,
+                    "confidence": confidence,
+                    "image_base64": base64.b64encode(content).decode("utf-8"),
+                    "attention_map_base64": attention_map_base64,
+                    "timestamp": time.time(),
+                }
+                payload_bytes = json.dumps(review_payload).encode("utf-8")
+                encrypted_payload = fernet.encrypt(payload_bytes)
+
+                out_path = os.path.join(HUMAN_REVIEW_DIR, f"{req_id}.enc")
+                with open(out_path, "wb") as f_out:
+                    f_out.write(encrypted_payload)
+            except Exception as store_err:
+                logger.error(
+                    f'"Failed to route to human review queue for request_id: {req_id}. Error: {store_err}"'
+                )
 
     except Exception as e:
         logger.error(
