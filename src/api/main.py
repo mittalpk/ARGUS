@@ -12,7 +12,7 @@ import torch
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 from PIL import Image
-from fastapi import FastAPI, File, UploadFile, Header, HTTPException, Response
+from fastapi import FastAPI, Request, File, UploadFile, Header, HTTPException, Response
 from pydantic import BaseModel
 from cryptography.fernet import Fernet
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
@@ -20,6 +20,7 @@ from src.api.monitoring import (
     PrometheusMonitoringMiddleware,
     argus_api_fraud_score_distribution,
 )
+from src.api.audit import AuditLoggingMiddleware
 from src.models.baseline import ARGUSBackbone
 from src.models.ensemble import ARGUSEnsemble
 
@@ -82,6 +83,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="ARGUS Identity Verification API", version="1.3.0", lifespan=lifespan
 )
+app.add_middleware(AuditLoggingMiddleware)
 app.add_middleware(PrometheusMonitoringMiddleware)
 
 
@@ -167,7 +169,9 @@ def health_check():
 
 @app.post("/classify", response_model=ClassificationResponse)
 def classify_image(
-    file: UploadFile = File(...), x_request_id: str = Header(None, alias="X-Request-ID")
+    request: Request,
+    file: UploadFile = File(...),
+    x_request_id: str = Header(None, alias="X-Request-ID"),
 ):
     start_time = time.perf_counter()
     req_id = x_request_id or str(uuid.uuid4())
@@ -292,7 +296,7 @@ def classify_image(
 
     latency_ms = float((time.perf_counter() - start_time) * 1000.0)
 
-    # Log metadata compliant with structured audit logs
+    # Store metadata in request state for the AuditLoggingMiddleware
     log_payload = {
         "request_id": req_id,
         "model_version": "v1.3.0",
@@ -302,7 +306,7 @@ def classify_image(
         "requires_human_review": requires_human_review,
         "latency_ms": round(latency_ms, 2),
     }
-    logger.info(str(log_payload).replace("'", '"'))
+    request.state.audit_log = log_payload
 
     return ClassificationResponse(
         request_id=req_id,
