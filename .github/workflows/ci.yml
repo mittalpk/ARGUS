@@ -85,7 +85,7 @@ jobs:
         with:
           context: .
           file: Dockerfile
-          tags: argus-api:latest
+          tags: argus:latest
           outputs: type=docker,dest=/tmp/image.tar
 
       - name: Run Trivy Vulnerability Scanner
