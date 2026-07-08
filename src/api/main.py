@@ -12,9 +12,14 @@ import torch
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 from PIL import Image
-from fastapi import FastAPI, File, UploadFile, Header, HTTPException
+from fastapi import FastAPI, File, UploadFile, Header, HTTPException, Response
 from pydantic import BaseModel
 from cryptography.fernet import Fernet
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+from src.api.monitoring import (
+    PrometheusMonitoringMiddleware,
+    argus_api_fraud_score_distribution,
+)
 from src.models.baseline import ARGUSBackbone
 from src.models.ensemble import ARGUSEnsemble
 
@@ -77,12 +82,33 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="ARGUS Identity Verification API", version="1.3.0", lifespan=lifespan
 )
+app.add_middleware(PrometheusMonitoringMiddleware)
+
+
+@app.get("/metrics")
+def metrics():
+    """
+    Exposes Prometheus format API telemetry metrics.
+    """
+    return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
 # Load model configuration from environment or fallback defaults
 MODEL_NAME = os.getenv("MODEL_NAME", "ensemble")
 CHECKPOINT_PATH = os.getenv("MODEL_CHECKPOINT_PATH", None)
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+if DEVICE.type == "cuda":
+    try:
+        # Active compatibility check
+        test_tensor = torch.randn(1, 3, 32, 32).to(DEVICE)
+        test_layer = torch.nn.Conv2d(3, 3, 3).to(DEVICE)
+        _ = test_layer(test_tensor)
+        logger.info('"CUDA compatibility verification passed."')
+    except Exception as e:
+        logger.warning(
+            f'"CUDA compatibility verification failed ({e}). Falling back to CPU."'
+        )
+        DEVICE = torch.device("cpu")
 
 logger.info(f'"Initializing model: {MODEL_NAME} on device: {DEVICE}"')
 
@@ -224,6 +250,9 @@ def classify_image(
         # Compute scores and decision
         fraud_score = float(torch.sigmoid(logit).item())
         result = "fraud" if fraud_score >= 0.5 else "genuine"
+
+        # Record fraud score in Prometheus telemetry histogram
+        argus_api_fraud_score_distribution.labels(result=result).observe(fraud_score)
 
         # Confidence score scaling (0.0 to 1.0)
         confidence = float(abs(fraud_score - 0.5) * 2.0)
