@@ -65,4 +65,3 @@ class PrometheusMonitoringMiddleware(BaseHTTPMiddleware):
             argus_api_request_duration_seconds.labels(endpoint=endpoint).observe(
                 latency
             )
-

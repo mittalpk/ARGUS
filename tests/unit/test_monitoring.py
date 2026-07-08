@@ -144,4 +144,3 @@ def test_metrics_and_health_endpoints_are_excluded():
         assert health_calls == 0.0 or health_calls is None
     except KeyError:
         pass
-
