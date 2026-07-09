@@ -33,6 +33,11 @@ def check_model_performance(
         logger.error(f"Failed to fetch candidate run {candidate_run_id}: {e}")
         return False
 
+    # Only compare against runs of the same architecture — an EfficientNet-B4
+    # candidate should never be gated against a stray EVA-02/ensemble run's
+    # (unrelated) APCER baseline.
+    candidate_model_name = candidate_run.data.params.get("model_name")
+
     # Get all runs in the experiment to find the previous best/champion run
     experiment_id = candidate_run.info.experiment_id
     try:
@@ -40,12 +45,14 @@ def check_model_performance(
             experiment_ids=[experiment_id],
             order_by=["metrics.val_apcer_at_1percent_bpcer ASC"],
         )
-        # Exclude the current candidate run itself from comparison
+        # Exclude the current candidate run itself, and any run trained with
+        # a different architecture, from the comparison.
         historical_runs = [
             r
             for r in runs
             if r.info.run_id != candidate_run_id
             and "val_apcer_at_1percent_bpcer" in r.data.metrics
+            and r.data.params.get("model_name") == candidate_model_name
         ]
 
         if not historical_runs:

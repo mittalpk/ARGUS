@@ -7,10 +7,15 @@ set -e
 
 echo "=== ARGUS Dataset Acquisition started ==="
 
-# Load credentials from .env if present
+# Load credentials from .env if present. `set -a` marks every variable
+# sourced below for export, and handles values containing spaces or shell
+# metacharacters correctly (unlike `export $(grep ... | xargs)`).
 if [ -f .env ]; then
     echo "Loading credentials from .env..."
-    export $(grep -v '^#' .env | xargs)
+    set -a
+    # shellcheck disable=SC1091
+    source .env
+    set +a
 fi
 
 # Map KAGGLE_API_TOKEN to KAGGLE_KEY if provided
@@ -29,10 +34,12 @@ if [ -z "${KAGGLE_USERNAME}" ] || [ -z "${KAGGLE_KEY}" ]; then
     chmod 600 "${HOME}/.kaggle/kaggle.json"
 fi
 
-# 2. Verify local disk has at least 60 GB free space
-AVAILABLE_SPACE_GB=$(df -BG . | tail -n 1 | awk '{print $4}' | tr -d 'G')
-if [ "${AVAILABLE_SPACE_GB}" -lt 60 ]; then
-    echo "Error: Insufficient disk space. Required: 60 GB, Available: ${AVAILABLE_SPACE_GB} GB."
+# 2. Verify local disk has at least 60 GB free space. `df --output=avail`
+# with `-BG` prints a plain integer number of GB, which is more portable
+# across `df`/locale variants than parsing the human-readable column.
+AVAILABLE_SPACE_GB=$(df -BG --output=avail . | tail -n 1 | tr -dc '0-9')
+if [ -z "${AVAILABLE_SPACE_GB}" ] || [ "${AVAILABLE_SPACE_GB}" -lt 60 ]; then
+    echo "Error: Insufficient disk space. Required: 60 GB, Available: ${AVAILABLE_SPACE_GB:-unknown} GB."
     exit 1
 fi
 

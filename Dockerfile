@@ -18,19 +18,31 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir --user -r requirements.txt
 
-# Pre-cache pretrained model weights in argus home cache directory
-ENV HF_HOME=/home/argus/.cache/huggingface
-ENV TORCH_HOME=/home/argus/.cache/torch
-RUN mkdir -p /home/argus/.cache/huggingface /home/argus/.cache/torch
-
-RUN python -c "import timm; timm.create_model('efficientnet_b4', pretrained=True); timm.create_model('convnextv2_base', pretrained=True); timm.create_model('eva02_large_patch14_448', pretrained=True)"
+# NOTE: no pretrained-ImageNet-weight pre-download here. Inference always
+# constructs the model with pretrained=False (see prepare_submission.py) and
+# loads the fine-tuned competition checkpoint below instead, so caching the
+# generic ImageNet weights at build time would only bloat the image.
 
 # ==========================================
 # Stage 2: Runner
 # ==========================================
 FROM python:3.10-slim AS runner
 
-# Create non-root system user and group
+# Create a system user/group for the app's own files. The default runtime
+# user is root (see the USER directive removed below) rather than this user,
+# because /submissions is a host-supplied bind mount whose ownership this
+# image does not control: the reproducibility contract's own documented
+# validation command (`docker run ... -v "$(pwd)/out:/submissions" ...`)
+# creates that directory with standard host permissions (owner-writable
+# only), and a fixed non-root UID inside the container has no way to write
+# to it — verified directly: this exact failure reproduces with the
+# checklist's own example command. Root bypasses that permission mismatch,
+# which matters more here than the non-root hardening does, since
+# `--network none` means there's no listening service in this batch-inference
+# mode for non-root isolation to protect in the first place. The FastAPI
+# server mode (`docker run ... uvicorn ...`) is network-facing and should
+# still be run behind non-root isolation at the orchestration layer
+# (e.g. a Kubernetes non-root securityContext) if deployed that way.
 RUN groupadd -g 10001 argus && \
     useradd -u 10001 -g argus -m -s /sbin/nologin argus
 
@@ -42,7 +54,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Copy installed Python packages from builder stage with correct ownership
 COPY --from=builder --chown=argus:argus /root/.local /home/argus/.local
-COPY --from=builder --chown=argus:argus /home/argus/.cache /home/argus/.cache
 
 # Copy application code with correct ownership
 WORKDIR /app
@@ -50,13 +61,15 @@ COPY --chown=argus:argus src/ /app/src/
 COPY --chown=argus:argus prepare_submission.py /app/
 COPY --chown=argus:argus entrypoint.sh /app/
 
-# Set env path variables for the non-root user local packages
-ENV PATH=/home/argus/.local/bin:$PATH
-ENV HF_HOME=/home/argus/.cache/huggingface
-ENV TORCH_HOME=/home/argus/.cache/torch
+# Bake in the trained champion checkpoint so the sandbox never needs to
+# download weights at inference time (network is disabled at inference).
+COPY --chown=argus:argus checkpoints/ /app/checkpoints/
 
-# Switch to non-root user security context
-USER argus
+# Set HOME so Python's user-site package resolution finds the packages
+# installed under /home/argus/.local above even though the runtime user is
+# root (root's default HOME is /root, which would otherwise miss them).
+ENV HOME=/home/argus
+ENV PATH=/home/argus/.local/bin:$PATH
 
 # Expose FastAPI API port
 EXPOSE 8000

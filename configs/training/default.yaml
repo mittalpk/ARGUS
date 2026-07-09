@@ -2,3 +2,7 @@ epochs: 5
 lr: 1e-4
 weight_decay: 1e-2
 seed: 42
+# Cap torch CPU threads for constrained CI/sandbox runners. Set to null
+# (or override via `training.num_threads=N`) to use PyTorch's default
+# thread pool for full-scale training runs.
+num_threads: 1

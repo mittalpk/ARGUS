@@ -23,7 +23,7 @@
 | **Project Lead** | Praveen Mittal |
 | **Sponsor** | Elena Vance |
 | **Start Date** | 2026-06-30 |
-| **Target Completion** | 2026-09-24 (FREUID Challenge 2026 Deadline) |
+| **Target Completion** | 2026-07-15, 23:59 AoE (FREUID Challenge 2026 reproducibility & Kaggle forum-reply deadline; code freeze 2026-07-13) |
 
 ### Problem Statement
 
@@ -128,6 +128,12 @@ Identity document fraud — including physical manipulations, GenAI-driven digit
 
 ## 8. Timeline
 
+> **Superseded**: this milestone table assumed a 2026-09-24 competition
+> deadline. The actual FREUID Challenge 2026 reproducibility deadline is
+> **2026-07-15, 23:59 AoE** with code freeze on **2026-07-13** — roughly ten
+> weeks earlier than planned here. Phases 0-4 below were compressed into
+> that shorter window.
+
 | Milestone | Target Date |
 |---|---|
 | Phase 0 complete — Charter and Vision approved | 2026-07-02 |
@@ -136,7 +142,7 @@ Identity document fraud — including physical manipulations, GenAI-driven digit
 | Phase 3 MVP — baseline model running | 2026-08-06 |
 | Phase 3 complete — champion model validated | 2026-09-03 |
 | Phase 4 complete — production deployment | 2026-09-17 |
-| Competition submission deadline | 2026-09-24 |
+| Competition submission deadline (superseded — see note above) | 2026-09-24 |
 
 ---
 

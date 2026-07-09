@@ -65,18 +65,14 @@ This document defines the complete testing strategy for Project ARGUS — coveri
 
 | Module | Key Test Areas |
 |---|---|
-| `src/data/ingestion.py` | Download validation, checksum verification, file extraction |
-| `src/data/preprocess.py` | Resize correctness, normalisation values, EXIF strip verification |
-| `src/data/augment.py` | Augmentation produces valid tensors; deterministic with fixed seed |
-| `src/data/dataset.py` | Dataset length, item shape, label correctness, split isolation |
-| `src/models/ensemble.py` | Forward pass output shape, weight normalisation, score range [0,1] |
-| `src/models/eva02.py` | Forward pass, feature extraction shape |
-| `src/models/convnext_v2.py` | Forward pass, feature extraction shape |
-| `src/models/efficientnet_b4.py` | Forward pass, feature extraction shape |
-| `src/training/train.py` | Training step, loss computation, gradient flow |
-| `src/training/evaluate.py` | APCER, BPCER, AuDET metric computation accuracy |
-| `src/api/routes/classify.py` | Input validation, response schema, error codes |
-| `src/api/schemas.py` | Pydantic model validation — valid and invalid inputs |
+| `src/data/ingestion.py` | EXIF-strip verification, schema validation, path-containment (`tests/unit/test_ingestion.py`) |
+| `src/data/split.py` | Stratified split ratios, determinism with fixed seed (`tests/unit/test_split.py`) |
+| `src/models/ensemble.py` | Forward pass output shape, weight normalisation, score range [0,1] (`tests/unit/test_ensemble.py`) |
+| `src/models/baseline.py` | Shared backbone forward pass / feature extraction shape, parametrized over `eva02_large_patch14_448`, `convnextv2_base`, `efficientnet_b4` (`tests/unit/test_models.py`) |
+| `src/training/train.py` | Seeding, DataLoader worker seeding, checkpoint save/load |
+| `src/training/metrics.py` | APCER, BPCER, AuDET metric computation accuracy (`tests/unit/test_metrics.py`) |
+| `src/api/main.py` | `/classify` input validation, response schema, error codes (`tests/unit/test_api.py`) |
+| `src/api/retraining.py` | RBAC (role header + shared-secret API key), rate limiting (`tests/unit/test_retraining.py`) |
 
 **Tooling**: `pytest`, `pytest-cov`
 **Coverage Gate**: ≥ 80% line coverage across `src/`

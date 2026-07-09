@@ -77,6 +77,20 @@ def strip_exif_and_validate_image(src_path: str, dest_path: str) -> bool:
         return False
 
 
+def _resolve_within(base_dir: str, candidate: str) -> str | None:
+    """
+    Joins candidate onto base_dir and returns the resulting path only if it
+    stays inside base_dir. Guards against path traversal ('../../etc/passwd')
+    or absolute paths in untrusted labels-CSV input silently escaping the
+    intended raw/processed directories.
+    """
+    base_dir_real = os.path.realpath(base_dir)
+    resolved = os.path.realpath(os.path.join(base_dir, candidate))
+    if os.path.commonpath([base_dir_real, resolved]) != base_dir_real:
+        return None
+    return resolved
+
+
 def run_ingestion(
     raw_dir: str, processed_dir: str, labels_csv: str
 ) -> tuple[pd.DataFrame, list[str]]:
@@ -94,22 +108,25 @@ def run_ingestion(
         # If 'image_path' column is in original CSV, resolve relative paths robustly
         if "image_path" in df.columns:
             rel_path = row["image_path"]
-            candidate_paths = [
-                os.path.join(raw_dir, rel_path),
-                os.path.join(raw_dir, os.path.basename(rel_path)),
-            ]
+            candidate_rel_paths = [rel_path, os.path.basename(rel_path)]
             src_image_path = None
-            for p in candidate_paths:
-                if os.path.exists(p):
-                    src_image_path = p
+            for rel in candidate_rel_paths:
+                resolved = _resolve_within(raw_dir, rel)
+                if resolved and os.path.exists(resolved):
+                    src_image_path = resolved
                     break
             if src_image_path is None:
-                src_image_path = candidate_paths[0]  # Default fallback
-            image_name = rel_path
+                # Default fallback: keep prior behavior of reporting a
+                # missing-file failure below, but still contained to raw_dir.
+                src_image_path = _resolve_within(
+                    raw_dir, os.path.basename(rel_path)
+                ) or os.path.join(raw_dir, os.path.basename(rel_path))
+            image_name = os.path.basename(rel_path)
         else:
             # Handle case where file extension is missing from image_id
             if not image_name.lower().endswith((".jpg", ".jpeg", ".png")):
                 image_name += ".jpg"
+            image_name = os.path.basename(image_name)
             src_image_path = os.path.join(raw_dir, image_name)
 
         dest_image_path = os.path.join(processed_dir, image_name)

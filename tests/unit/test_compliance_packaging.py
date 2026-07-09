@@ -1,6 +1,7 @@
 import json
 import zipfile
 from unittest.mock import patch
+import mlflow
 from scripts.package_compliance_evidence import (
     find_dvc_files,
     generate_model_card,
@@ -26,18 +27,83 @@ def test_find_dvc_files(tmp_path):
     assert "mockhash123" in str(results["data/splits.dvc"])
 
 
-def test_generate_model_card(tmp_path):
+def test_generate_model_card_without_training_run(tmp_path):
     """
-    Assert that the Model Card markdown includes expected version and sections.
+    With no MLflow run to report on, the card must say so plainly rather
+    than asserting a performance figure that was never measured.
     """
-    latest_run = tmp_path / "latest_run_id.txt"
-    latest_run.write_text("mock-run-id-456")
+    empty_tracking_uri = f"sqlite:///{tmp_path}/empty_mlflow.db"
 
-    card = generate_model_card(str(tmp_path))
+    card = generate_model_card(
+        str(tmp_path),
+        tracking_uri=empty_tracking_uri,
+        experiment_name="Nonexistent_Experiment",
+    )
     assert "ARGUS Model Card" in card
     assert "v1.3.0" in card
-    assert "mock-run-id-456" in card
-    assert "APCER" in card
+    assert "No completed training run found" in card
+
+
+def test_generate_model_card_with_training_run(tmp_path):
+    """
+    When a real MLflow run has logged the challenge metrics, the card must
+    report the actual measured values, not a hardcoded claim.
+    """
+    tracking_uri = f"sqlite:///{tmp_path}/mlflow.db"
+    mlflow.set_tracking_uri(tracking_uri)
+    mlflow.set_experiment("Test_Champion_Training")
+
+    with mlflow.start_run(run_name="efficientnet_b4_run") as run:
+        mlflow.log_param("model_name", "efficientnet_b4")
+        mlflow.log_param("epochs", 3)
+        mlflow.log_param("batch_size", 8)
+        mlflow.log_param("image_size", 380)
+        mlflow.log_param("train_size", 700)
+        mlflow.log_param("val_size", 150)
+        mlflow.log_metric("val_apcer_at_1percent_bpcer", 0.1234)
+        mlflow.log_metric("val_audet", 0.5678)
+        mlflow.log_metric("p95_latency_ms", 42.5)
+        run_id = run.info.run_id
+
+    card = generate_model_card(
+        str(tmp_path),
+        tracking_uri=tracking_uri,
+        experiment_name="Test_Champion_Training",
+    )
+    assert run_id in card
+    assert "efficientnet_b4" in card
+    assert "0.1234" in card
+    assert "0.5678" in card
+    assert "42.5" in card
+    assert "700" in card and "150" in card
+    # These metrics aren't suspiciously perfect, so no overfitting caveat
+    assert "Caveat" not in card
+
+
+def test_generate_model_card_flags_suspiciously_perfect_metrics(tmp_path):
+    """
+    Near-zero APCER/AuDET must not be presented as a clean win without a
+    caveat — that pattern is exactly what let the original audit's fabricated
+    "Achieved" claims through unquestioned.
+    """
+    tracking_uri = f"sqlite:///{tmp_path}/mlflow.db"
+    mlflow.set_tracking_uri(tracking_uri)
+    mlflow.set_experiment("Test_Perfect_Training")
+
+    with mlflow.start_run(run_name="efficientnet_b4_run"):
+        mlflow.log_param("model_name", "efficientnet_b4")
+        mlflow.log_param("train_size", 48546)
+        mlflow.log_param("val_size", 10403)
+        mlflow.log_metric("val_apcer_at_1percent_bpcer", 0.0)
+        mlflow.log_metric("val_audet", 0.0)
+
+    card = generate_model_card(
+        str(tmp_path),
+        tracking_uri=tracking_uri,
+        experiment_name="Test_Perfect_Training",
+    )
+    assert "Caveat" in card
+    assert "suspicion" in card
 
 
 def test_generate_conformity_assessment():

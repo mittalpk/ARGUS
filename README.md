@@ -9,11 +9,17 @@ ARGUS is designed to address three primary types of document forgery:
 
 ---
 
-## Project Status & Roadmap
+## Project Status
 
-This project is currently in active development. The system architecture, compliance checkpoints, and delivery roadmap are guided by the [Enterprise AI Project Runbook](docs/project_runbook.md).
+This repository is the reproducibility package for Team ARGUS's FREUID Challenge 2026 submission. The system architecture, compliance checkpoints, and delivery history are documented in the [Enterprise AI Project Runbook](docs/project_runbook.md).
 
-### Planned Repository Structure
+The Docker image ships with a trained EfficientNet-B4 champion checkpoint
+(`checkpoints/champion_efficientnet_b4.pth`, produced by
+`scripts/train_champion_checkpoint.sh`) baked in — see
+[Reproducing the Submission](#reproducing-the-submission) below to rebuild
+and verify it end-to-end.
+
+### Repository Structure
 ```text
 ARGUS/
 ├── docs/                           # Architecture and design documentation
@@ -42,9 +48,9 @@ ARGUS/
 ## Technical Approach
 
 ### Model Architecture
-The system will utilize an ensemble of diverse deep learning backbones to balance latency and accuracy:
+ARGUS is built around an ensemble of diverse deep learning backbones that trade off latency and accuracy:
 - **EVA-02-Large** / **ConvNeXt-V2-Base**: High-capacity feature extractors for fine-grained texture and pattern analysis.
-- **EfficientNet-B4**: A lightweight backbone optimized for lower-latency inference.
+- **EfficientNet-B4**: A lightweight backbone optimized for lower-latency inference — this is the backbone shipped as the Docker image's default champion checkpoint, since it is the fastest to train and serve while the full three-backbone ensemble (`--model_name ensemble`) remains available for teams with the compute budget to train all three.
 
 ### Evaluation Metrics
 We optimize for the competition's primary metric along with key production-focused metrics:
@@ -63,11 +69,40 @@ bash scripts/setup.sh
 ```
 
 ### 2. Dataset Acquisition
-Ensure your Kaggle API credentials are configured in `~/.kaggle/kaggle.json`:
+Ensure your Kaggle API credentials are configured in `~/.kaggle/kaggle.json` or a local `.env` (see `.env` — never commit real credentials):
 ```bash
-kaggle competitions download -c the-freuid-challenge-2026-ijcai-ecai -p data/
-unzip data/the-freuid-challenge-2026-ijcai-ecai.zip -d data/
+bash scripts/download_data.sh
 ```
+
+---
+
+## Reproducing the Submission
+
+1. **Download the dataset** (above) — this populates `data/the-freuid-challenge-2026/`.
+2. **Train the champion checkpoint** that ships inside the Docker image:
+   ```bash
+   bash scripts/train_champion_checkpoint.sh
+   ```
+   This runs the same ingestion → split → train → model-gate pipeline used
+   in production on a fixed-seed stratified sample of the training set, and
+   writes `checkpoints/champion_efficientnet_b4.pth`. Raise `SAMPLE_PER_CLASS`
+   and `EPOCHS` (env vars) to train on more data for a stronger model.
+3. **Generate real compliance evidence** from that run:
+   ```bash
+   pip install -r requirements-dev.txt
+   python scripts/package_compliance_evidence.py
+   ```
+4. **Build and verify the sandboxed Docker image**:
+   ```bash
+   docker build -t argus-freuid:local .
+   docker run --rm --network none \
+     -v "$(pwd)/data/the-freuid-challenge-2026/public_test:/data:ro" \
+     -v "$(pwd)/out:/submissions" \
+     argus-freuid:local
+   ```
+   Verify `out/submission.csv` has one `id,label` row per input image.
+
+See the FREUID Challenge 2026 reproducibility page for the full prize-eligibility checklist and Kaggle forum reply requirements.
 
 ---
 

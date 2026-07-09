@@ -1,0 +1,25 @@
+# The Dockerfile only COPYs specific paths (src/, prepare_submission.py,
+# entrypoint.sh, checkpoints/, requirements.txt), so nothing here can leak
+# into the image today — this is a safety net against that changing later
+# (e.g. a future `COPY . .`) and against secrets ending up in the build
+# context sent to the Docker daemon in the first place.
+.env
+.env.*
+*.pem
+*.key
+.git/
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+data/
+mlruns/
+mlflow.db
+outputs/
+notebooks/
+docs/
+tests/
+.dvc/cache/
+.dvc/tmp/

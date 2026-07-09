@@ -13,12 +13,24 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# The champion checkpoint promoted by scripts/check_model_gate.py, baked into
+# the Docker image (see Dockerfile). EfficientNet-B4 is the shipped default
+# because it is the lightweight, lower-latency backbone (see README) that is
+# tractable to train end-to-end within the reproducibility environment; the
+# ensemble architecture remains available via --model_name ensemble for teams
+# with the compute budget to train all three backbones.
+DEFAULT_CHECKPOINT_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "checkpoints",
+    "champion_efficientnet_b4.pth",
+)
+
 
 def predict_labels(
     input_dir: str = "/data",
     output_csv: str = "/submissions/submission.csv",
-    model_name: str = "ensemble",
-    checkpoint_path: str = None,
+    model_name: str = "efficientnet_b4",
+    checkpoint_path: str = DEFAULT_CHECKPOINT_PATH,
 ):
     """
     Reads flat test images from input_dir, runs inference, and writes predictions to output_csv.
@@ -38,6 +50,24 @@ def predict_labels(
 
     # Initialize the model backbone
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if device.type == "cuda":
+        try:
+            # torch.cuda.is_available() only checks that a CUDA driver and
+            # device are present, not that this torch build actually ships
+            # kernels for the device's compute capability. Probe with a real
+            # kernel launch so unsupported GPUs (e.g. a PyTorch build without
+            # sm_120 support on a Blackwell-class card) fall back to CPU
+            # instead of silently failing every forward pass and defaulting
+            # every prediction to 0.5 (see the except branch in the loop below).
+            test_tensor = torch.randn(1, 3, 32, 32).to(device)
+            test_layer = torch.nn.Conv2d(3, 3, 3).to(device)
+            test_layer(test_tensor)
+        except Exception as e:
+            logger.warning(
+                f"CUDA is available but incompatible with this PyTorch build: {e}"
+            )
+            logger.warning("Falling back to CPU mode.")
+            device = torch.device("cpu")
     logger.info(f"Using inference device: {device}")
 
     # Pretrained=False to comply with no-network sandbox requirements
@@ -51,7 +81,9 @@ def predict_labels(
     # Load model weights if provided
     if checkpoint_path and os.path.exists(checkpoint_path):
         logger.info(f"Loading model checkpoint from {checkpoint_path}...")
-        model.load_state_dict(torch.load(checkpoint_path, map_location=device))
+        model.load_state_dict(
+            torch.load(checkpoint_path, map_location=device, weights_only=True)
+        )
     else:
         logger.warning(
             "No valid checkpoint path provided. Running inference with randomly initialized weights (Liveness verification mode)."
@@ -139,12 +171,15 @@ if __name__ == "__main__":
         help="Path to write submission.csv",
     )
     parser.add_argument(
-        "--model_name", type=str, default="ensemble", help="Model backbone name"
+        "--model_name",
+        type=str,
+        default="efficientnet_b4",
+        help="Model backbone name",
     )
     parser.add_argument(
         "--checkpoint",
         type=str,
-        default=None,
+        default=DEFAULT_CHECKPOINT_PATH,
         help="Path to trained model weights checkpoint (.pth)",
     )
 

@@ -240,13 +240,25 @@ def trigger_retraining_api(url: str, psi: float):
     try:
         import urllib.request
         import urllib.error
+        import urllib.parse
+
+        # --trigger-retrain-url is operator-configured, not end-user input,
+        # but urlopen will happily follow file:// and other non-HTTP schemes
+        # if given one — restrict to http(s) so a misconfigured URL can't
+        # turn this into a local file read.
+        scheme = urllib.parse.urlsplit(url).scheme
+        if scheme not in ("http", "https"):
+            logger.error(
+                f"Refusing to trigger retraining at non-HTTP(S) URL scheme: {scheme!r}"
+            )
+            return
 
         headers = {"Content-Type": "application/json"}
         payload_data = json.dumps({"psi": psi, "drift_detected": True}).encode("utf-8")
         req = urllib.request.Request(
             url, data=payload_data, headers=headers, method="POST"
         )
-        with urllib.request.urlopen(req, timeout=10) as response:
+        with urllib.request.urlopen(req, timeout=10) as response:  # nosec B310 - scheme checked above
             status_code = response.getcode()
             logger.info(
                 f"Successfully posted retraining trigger to {url}. HTTP Status: {status_code}"

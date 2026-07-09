@@ -1,0 +1,6 @@
+# Compliance/audit tooling used by scripts/package_compliance_evidence.py.
+# Kept separate from requirements.txt (the pinned runtime image deps) because
+# pip-audit needs platformdirs>=4.2, which conflicts with dvc's <4 pin — and
+# neither of these tools should ship inside the inference container anyway.
+bandit==1.9.4
+pip-audit==2.10.1
