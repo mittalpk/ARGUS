@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import sys
 import time
 from fastapi import Request, Response
@@ -39,7 +40,6 @@ formatter = AuditJSONFormatter(datefmt="%Y-%m-%dT%H:%M:%S%z")
 stream_handler.setFormatter(formatter)
 audit_logger.addHandler(stream_handler)
 
-import os
 audit_log_file = os.getenv("AUDIT_LOG_FILE")
 if audit_log_file:
     # Ensure parent directory exists
@@ -47,7 +47,6 @@ if audit_log_file:
     file_handler = logging.FileHandler(audit_log_file)
     file_handler.setFormatter(formatter)
     audit_logger.addHandler(file_handler)
-
 
 
 # 3. Audit Logging Middleware
