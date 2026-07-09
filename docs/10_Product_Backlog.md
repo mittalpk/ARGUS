@@ -1,7 +1,7 @@
 # ARGUS Initial Product Backlog
 ## Sprint 1 Seed Backlog
 
-Source: `docs/03_Use_Case_Specification.md`
+Source: `docs/Phase-1/03_Use_Case_Specification.md`
 
 ---
 

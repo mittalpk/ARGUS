@@ -118,3 +118,33 @@ def test_rbac_promotion_approved_for_lead_roles():
         tracking_uri=TEST_DB_URI,
     )
     assert updated_details_prod.current_stage == "Production"
+
+
+def test_rbac_promotion_requires_api_key_when_configured(monkeypatch):
+    """
+    When ARGUS_PROMOTION_API_KEY is configured, the correct role alone is no
+    longer sufficient — a matching --api-key must also be supplied.
+    """
+    monkeypatch.setattr(
+        "src.mlops.promote_model.PROMOTION_API_KEY", "test-promotion-secret"
+    )
+
+    with pytest.raises(AccessDeniedError):
+        promote_model(
+            model_name=MODEL_NAME,
+            version=1,
+            stage="Staging",
+            user_role="Lead Data Scientist",
+            tracking_uri=TEST_DB_URI,
+            api_key=None,
+        )
+
+    updated_details = promote_model(
+        model_name=MODEL_NAME,
+        version=1,
+        stage="Staging",
+        user_role="Lead Data Scientist",
+        tracking_uri=TEST_DB_URI,
+        api_key="test-promotion-secret",
+    )
+    assert updated_details.current_stage == "Staging"

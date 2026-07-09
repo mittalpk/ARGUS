@@ -31,8 +31,13 @@ def compute_apcer_at_target_bpcer(
     y_true: np.ndarray, y_prob: np.ndarray, target_bpcer: float = 0.01
 ) -> tuple[float, float, float]:
     """
-    Finds the operating point where BPCER is closest to target_bpcer (e.g. 1%)
-    and returns (APCER, BPCER, operating_threshold).
+    Finds the strictest operating point that still satisfies BPCER <=
+    target_bpcer (e.g. 1%) and returns (APCER, BPCER, operating_threshold).
+
+    This is intentionally the highest BPCER at or below the target, not the
+    ROC point numerically closest to it — for a fraud gate we never want to
+    silently accept a BPCER above the stated target, so ties favor the more
+    conservative (lower BPCER, higher APCER) side of the target.
     """
     # y_true labels: 1 = fraud (positive class), 0 = genuine (negative class)
     # ROC curve calculations
@@ -69,6 +74,9 @@ def compute_audet(y_true: np.ndarray, y_prob: np.ndarray) -> float:
     fpr_sorted = fpr[sort_idx]
     fnr_sorted = fnr[sort_idx]
 
-    # Integrate using trapezoidal rule
-    audet = np.trapz(fnr_sorted, fpr_sorted)
+    # Integrate using trapezoidal rule. `np.trapezoid` replaced `np.trapz` in
+    # NumPy 2.0; requirements.txt currently pins numpy==1.26.4 (pre-2.0), so
+    # fall back for whichever name the installed NumPy actually provides.
+    trapezoid_fn = getattr(np, "trapezoid", None) or np.trapz
+    audet = trapezoid_fn(fnr_sorted, fpr_sorted)
     return float(audet)

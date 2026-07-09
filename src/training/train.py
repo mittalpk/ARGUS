@@ -86,8 +86,11 @@ def profile_p95_latency(model, device, image_size: int, runs: int = 100) -> floa
 
 @hydra.main(version_base=None, config_path="../../configs", config_name="config")
 def main(cfg: DictConfig):
-    # Restrict CPU threads to prevent memory OOMs in restricted sandboxes
-    torch.set_num_threads(1)
+    # Cap CPU threads in constrained sandboxes (e.g. CI); leave PyTorch's
+    # default alone for real training runs unless explicitly overridden.
+    num_threads = cfg.training.get("num_threads", None)
+    if num_threads:
+        torch.set_num_threads(int(num_threads))
     set_seed(cfg.training.seed)
 
     # Read model-specific parameters or fallback to defaults
@@ -135,11 +138,24 @@ def main(cfg: DictConfig):
             f"Val size: {len(val_dataset)}. Partitions must contain at least 1 image."
         )
 
+    # Give each worker process a distinct but seed-derived RNG state so
+    # forked workers don't replay identical Albumentations augmentations,
+    # while the run as a whole stays reproducible across `num_workers` values.
+    loader_generator = torch.Generator()
+    loader_generator.manual_seed(cfg.training.seed)
+
+    def _worker_init_fn(worker_id: int):
+        worker_seed = cfg.training.seed + worker_id
+        np.random.seed(worker_seed)
+        random.seed(worker_seed)
+
     train_loader = DataLoader(
         train_dataset,
         batch_size=cfg.data.batch_size,
         shuffle=True,
         num_workers=cfg.data.num_workers,
+        worker_init_fn=_worker_init_fn if cfg.data.num_workers > 0 else None,
+        generator=loader_generator,
     )
     val_loader = DataLoader(
         val_dataset,
@@ -202,6 +218,11 @@ def main(cfg: DictConfig):
         mlflow.log_param("batch_size", cfg.data.batch_size)
         mlflow.log_param("image_size", image_size)
         mlflow.log_param("use_amp", use_amp)
+        # Logged so downstream reporting (e.g. the model card) can state the
+        # actual training-set size instead of assuming it matches whatever
+        # sample size a prior run used.
+        mlflow.log_param("train_size", len(train_dataset))
+        mlflow.log_param("val_size", len(val_dataset))
         mlflow.log_metric("p95_latency_ms", p95_latency)
 
         best_val_apcer = 1.0
@@ -292,7 +313,9 @@ def main(cfg: DictConfig):
             logger.info(
                 f"Registering model version '{cfg.mlflow.registered_model_name}' to MLflow Model Registry..."
             )
-            model.load_state_dict(torch.load(checkpoint_path, map_location=device))
+            model.load_state_dict(
+                torch.load(checkpoint_path, map_location=device, weights_only=True)
+            )
             mlflow.pytorch.log_model(
                 pytorch_model=model,
                 artifact_path="model",

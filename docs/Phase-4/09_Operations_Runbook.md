@@ -16,6 +16,14 @@
 
 ---
 
+> **Scope note**: this runbook describes target production operations for a
+> continuously-served ARGUS API (Kubernetes, PagerDuty, Grafana dashboards,
+> on-call rotation). The FREUID Challenge 2026 submission itself is a single
+> offline, no-network Docker batch-inference container (see repository-root
+> `Dockerfile`) — none of the always-on infrastructure below is deployed as
+> part of this repository. Treat this as forward-looking design
+> documentation, not a description of a currently running service.
+
 ## 1. Service Overview
 
 | Attribute | Detail |

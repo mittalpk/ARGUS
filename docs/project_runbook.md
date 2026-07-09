@@ -67,8 +67,8 @@ Establish scope, business value, governance model, stakeholders, success criteri
 - Establish governance bodies: ARB, product steering group, security/compliance review path
 
 ### Deliverables
-- `docs/00_Project_Charter.md`
-- `docs/01_Architecture_Vision.md`
+- `docs/Phase-0/00_Project_Charter.md`
+- `docs/Phase-0/01_Architecture_Vision.md`
 - Initial stakeholder matrix
 - RAID log (risks, assumptions, issues, dependencies)
 
@@ -118,8 +118,8 @@ Translate project vision into measurable functional, non-functional, operational
 - Create initial backlog in project management tooling
 
 ### Deliverables
-- `docs/02_BRD.md`
-- `docs/03_Use_Case_Specification.md`
+- `docs/Phase-1/02_BRD.md`
+- `docs/Phase-1/03_Use_Case_Specification.md`
 - Initial product backlog
 - Traceability matrix from business goals to system requirements
 
@@ -170,8 +170,8 @@ Define solution architecture, data architecture, deployment architecture, interf
 - Define environments: dev, test, staging, production
 
 ### Deliverables
-- `docs/04_SAD.md`
-- `docs/05_DAD.md`
+- `docs/Phase-2/04_SAD.md`
+- `docs/Phase-2/05_DAD.md`
 - `docs/adr/`
 - API contract specification
 - Deployment topology diagram
@@ -244,8 +244,8 @@ Build the data pipeline, train and evaluate candidate models, harden the codebas
 - Run security scans on dependencies and images
 
 ### Deliverables
-- `docs/06_ML_Design.md`
-- `docs/07_Test_Strategy.md`
+- `docs/Phase-3/06_ML_Design.md`
+- `docs/Phase-3/07_Test_Strategy.md`
 - `src/`
 - trained model artifacts
 - experiment registry entries
@@ -307,8 +307,8 @@ Prepare the system for production by validating infrastructure, deployment autom
 - Complete handover to operations team
 
 ### Deliverables
-- `docs/08_Security_Compliance.md`
-- `docs/09_Operations_Runbook.md`
+- `docs/Phase-4/08_Security_Compliance.md`
+- `docs/Phase-4/09_Operations_Runbook.md`
 - release package and deployment manifests
 - dashboard and alert catalogue
 - release readiness evidence pack
@@ -604,16 +604,17 @@ The project is not considered execution-ready unless the following documents exi
 
 | Document | Purpose | Owner |
 |---|---|---|
-| `00_Project_Charter.md` | Scope, business case, constraints | Project Manager |
-| `01_Architecture_Vision.md` | Target state and architecture vision | AI Solution Architect |
-| `02_BRD.md` | Functional and non-functional requirements | Business Analyst |
-| `03_Use_Case_Specification.md` | User stories, flows, failure modes | Product / Business Analyst |
-| `04_SAD.md` | Solution architecture design | AI Solution Architect |
-| `05_DAD.md` | Data design and lineage | Data Architect |
-| `06_ML_Design.md` | Model design and experimentation plan | Lead Data Scientist |
-| `07_Test_Strategy.md` | Testing approach and evidence requirements | QA Lead |
-| `08_Security_Compliance.md` | Security and regulatory controls | Security / Compliance Lead |
-| `09_Operations_Runbook.md` | Production operations and support procedures | Operations Lead |
+| `Phase-0/00_Project_Charter.md` | Scope, business case, constraints | Project Manager |
+| `Phase-0/01_Architecture_Vision.md` | Target state and architecture vision | AI Solution Architect |
+| `Phase-1/02_BRD.md` | Functional and non-functional requirements | Business Analyst |
+| `Phase-1/03_Use_Case_Specification.md` | User stories, flows, failure modes | Product / Business Analyst |
+| `Phase-2/04_SAD.md` | Solution architecture design | AI Solution Architect |
+| `Phase-2/05_DAD.md` | Data design and lineage | Data Architect |
+| `Phase-3/06_ML_Design.md` | Model design and experimentation plan | Lead Data Scientist |
+| `Phase-3/07_Test_Strategy.md` | Testing approach and evidence requirements | QA Lead |
+| `Phase-4/08_Security_Compliance.md` | Security and regulatory controls | Security / Compliance Lead |
+| `Phase-4/09_Operations_Runbook.md` | Production operations and support procedures | Operations Lead |
+| `10_Product_Backlog.md` | Prioritized backlog of user stories across phases | Product / Business Analyst |
 
 ---
 
@@ -647,15 +648,15 @@ The project is not considered execution-ready unless the following documents exi
 
 The following files should be created first to enable project execution:
 
-1. `docs/00_Project_Charter.md`
-2. `docs/01_Architecture_Vision.md`
-3. `docs/02_BRD.md`
-4. `docs/04_SAD.md`
-5. `docs/05_DAD.md`
-6. `docs/06_ML_Design.md`
-7. `docs/07_Test_Strategy.md`
-8. `docs/08_Security_Compliance.md`
-9. `docs/09_Operations_Runbook.md`
+1. `docs/Phase-0/00_Project_Charter.md`
+2. `docs/Phase-0/01_Architecture_Vision.md`
+3. `docs/Phase-1/02_BRD.md`
+4. `docs/Phase-2/04_SAD.md`
+5. `docs/Phase-2/05_DAD.md`
+6. `docs/Phase-3/06_ML_Design.md`
+7. `docs/Phase-3/07_Test_Strategy.md`
+8. `docs/Phase-4/08_Security_Compliance.md`
+9. `docs/Phase-4/09_Operations_Runbook.md`
 10. `docs/adr/ADR-001-template.md`
 
 ---

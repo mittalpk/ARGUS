@@ -18,6 +18,18 @@
 
 This document defines the complete security and regulatory compliance posture for Project ARGUS. It covers the threat model, security controls, data protection measures, AI governance controls, and evidence requirements for EU AI Act, GDPR, and ISO/IEC 42001 compliance. It is mandatory for the Phase 4 Release Readiness Review.
 
+> **Scope note**: this document describes the target enterprise production
+> deployment (Kubernetes, Vault, image signing, on-call rotation, etc.).
+> The actual deliverable for the FREUID Challenge 2026 submission is the
+> single sandboxed Docker container defined at the repository root
+> (`Dockerfile`, `entrypoint.sh`, `prepare_submission.py`) — no Kubernetes
+> manifests, Vault instance, or on-call tooling exist in this repository.
+> Treat the controls below as design intent for a future production
+> deployment, not as claims about what is running today; the controls that
+> **are** implemented in this repo (audit logging, RBAC + shared-secret
+> auth, drift detection, secret/dependency/SAST scanning) are cross-referenced
+> to their actual source files inline.
+
 ---
 
 ## 2. Regulatory Classification
@@ -87,7 +99,7 @@ Residual risks rated **Medium** or above require formal acceptance by the Securi
 
 | Threat ID | Residual Risk | Accepted By | Date | Conditions |
 |---|---|---|---|---|
-| T-01 | Medium | Security Lead | 2026-07-02 | Human review mandatory for confidence < 0.70; model robustness re-evaluated at every release |
+| T-01 | Medium | Security Lead | 2026-07-02 | Human review mandatory for confidence < 0.70 (default; configurable via `HUMAN_REVIEW_CONFIDENCE_THRESHOLD` — see `src/api/main.py`); model robustness re-evaluated at every release |
 
 ---
 
@@ -145,7 +157,7 @@ Residual risks rated **Medium** or above require formal acceptance by the Securi
 | Model artifact signing | Signed hash stored in MLflow alongside artifact |
 | Promotion approval | Champion model requires named approval in MLflow before production deployment |
 | No raw logit exposure | API returns fraud_score [0,1] only — no raw logits |
-| Confidence threshold | Predictions with confidence < 0.70 flagged for human review — limits adversarial probing value |
+| Confidence threshold | Predictions with confidence < 0.70 (default, env-configurable) flagged for human review — limits adversarial probing value |
 | Model card | Mandatory for every production model |
 
 ---

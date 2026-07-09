@@ -1,5 +1,6 @@
 import os
 import json
+import secrets
 import uuid
 import logging
 from datetime import datetime, timedelta, timezone
@@ -11,6 +12,29 @@ router = APIRouter(prefix="/retrain", tags=["retraining"])
 logger = logging.getLogger("ARGUS_Retraining_API")
 
 STATE_FILE = os.getenv("RETRAINING_STATE_FILE", "data/retraining_state.json")
+
+# X-User-Role alone is just a caller-supplied header — anyone can set it, so
+# it can't carry authorization on its own. Approval additionally requires a
+# shared-secret API key so only callers holding that secret can approve
+# retraining compute. Configured out-of-band (not in source control).
+RETRAINING_APPROVAL_API_KEY = os.getenv("RETRAINING_APPROVAL_API_KEY")
+
+
+def _check_approval_authorized(x_user_role: Optional[str], x_api_key: Optional[str]) -> None:
+    if not RETRAINING_APPROVAL_API_KEY:
+        # Fail closed: an approval endpoint with no configured secret would
+        # otherwise accept the role header alone, which is unauthenticated.
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Retraining approval is not configured (RETRAINING_APPROVAL_API_KEY unset).",
+        )
+    if x_user_role != "Lead Data Scientist" or not x_api_key or not secrets.compare_digest(
+        x_api_key, RETRAINING_APPROVAL_API_KEY
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access Denied: Only Lead Data Scientist is authorized to approve retraining compute.",
+        )
 
 
 class DriftPayload(BaseModel):
@@ -60,8 +84,11 @@ def check_rate_limit(requests: List[dict]) -> bool:
                 )
                 if resolved_time >= one_week_ago:
                     return True
-            except Exception:
-                pass
+            except (ValueError, TypeError) as e:
+                # A malformed timestamp in state history shouldn't block
+                # the rate-limit check for every other entry; skip it but
+                # don't swallow it silently.
+                logger.warning(f"Skipping unparseable resolved_at timestamp: {e}")
     return False
 
 
@@ -81,6 +108,18 @@ def trigger_workflow(request_id: str) -> bool:
     try:
         import urllib.request
         import urllib.error
+        import urllib.parse
+
+        # RETRAINING_WORKFLOW_URL is operator-configured, not end-user
+        # input, but urllib.request.urlopen will happily follow file:// and
+        # other non-HTTP schemes if given one — restrict to http(s) so a
+        # misconfigured URL can't turn this into a local file read.
+        scheme = urllib.parse.urlsplit(workflow_url).scheme
+        if scheme not in ("http", "https"):
+            logger.error(
+                f"Refusing to dispatch workflow to non-HTTP(S) URL scheme: {scheme!r}"
+            )
+            return False
 
         headers = {"Content-Type": "application/json"}
         token = os.getenv("RETRAINING_WORKFLOW_TOKEN")
@@ -94,7 +133,7 @@ def trigger_workflow(request_id: str) -> bool:
             workflow_url, data=payload_data, headers=headers, method="POST"
         )
 
-        with urllib.request.urlopen(req, timeout=10) as response:
+        with urllib.request.urlopen(req, timeout=10) as response:  # nosec B310 - scheme checked above
             status_code = response.getcode()
             logger.info(
                 f"Successfully dispatched workflow to {workflow_url}, status: {status_code}"
@@ -153,13 +192,11 @@ def request_retraining(payload: DriftPayload):
 def approve_retraining(
     request_id: str,
     x_user_role: Optional[str] = Header(None, alias="X-User-Role"),
+    x_api_key: Optional[str] = Header(None, alias="X-API-Key"),
 ):
-    # 1. Enforce Role-Based Access Control (RBAC)
-    if x_user_role != "Lead Data Scientist":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access Denied: Only Lead Data Scientist is authorized to approve retraining compute.",
-        )
+    # 1. Enforce Role-Based Access Control (RBAC): role header plus a shared
+    # secret, since the role header by itself is just caller-asserted state.
+    _check_approval_authorized(x_user_role, x_api_key)
 
     state = load_state()
 

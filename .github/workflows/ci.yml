@@ -7,6 +7,33 @@ on:
     branches: [ main ]
 
 jobs:
+  compliance-evidence:
+    name: Generate Compliance Evidence Pack
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Run Bandit / pip-audit / Secret Scan And Package Evidence
+        run: python scripts/package_compliance_evidence.py
+
+      - name: Upload Evidence Pack
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-evidence-pack
+          path: outputs/compliance_evidence_pack.zip
+
   lint:
     name: Code Style and Quality Checks
     runs-on: ubuntu-latest
@@ -97,3 +124,36 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os'
           severity: 'HIGH,CRITICAL'
+
+      - name: Load Image For Sandbox Contract Test
+        run: docker load --input /tmp/image.tar
+
+      - name: Exercise Docker Sandbox Contract
+        run: |
+          # Build a small flat fixture directory covering every supported
+          # extension (case-insensitive) plus one deliberately corrupt file,
+          # then run the image exactly as the organizers' harness would:
+          # --network none, /data read-only, /submissions read-write.
+          mkdir -p /tmp/sandbox_test/data /tmp/sandbox_test/out
+          python3 -c "from PIL import Image; Image.new('RGB', (32, 32)).save('/tmp/sandbox_test/data/sample_a.jpeg')"
+          python3 -c "from PIL import Image; Image.new('RGB', (32, 32)).save('/tmp/sandbox_test/data/sample_b.PNG')"
+          echo "not a real image" > /tmp/sandbox_test/data/corrupt_c.jpg
+
+          docker run --rm \
+            --network none \
+            -v /tmp/sandbox_test/data:/data:ro \
+            -v /tmp/sandbox_test/out:/submissions \
+            argus:latest
+
+          test -f /tmp/sandbox_test/out/submission.csv || { echo "submission.csv was not written"; exit 1; }
+          python3 -c "
+          import csv, sys
+          with open('/tmp/sandbox_test/out/submission.csv') as f:
+              rows = list(csv.DictReader(f))
+          assert set(rows[0].keys()) == {'id', 'label'}, f'unexpected columns: {rows[0].keys()}'
+          ids = {r['id'] for r in rows}
+          assert ids == {'sample_a', 'sample_b', 'corrupt_c'}, f'unexpected/missing ids: {ids}'
+          for r in rows:
+              float(r['label'])  # must be a finite float
+          print(f'Sandbox contract OK: {len(rows)} rows, columns {list(rows[0].keys())}')
+          "

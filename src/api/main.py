@@ -6,6 +6,7 @@ import base64
 import logging
 import json
 import asyncio
+import threading
 from contextlib import asynccontextmanager
 import numpy as np
 import torch
@@ -43,6 +44,15 @@ fernet = Fernet(HUMAN_REVIEW_ENCRYPTION_KEY.encode())
 
 HUMAN_REVIEW_DIR = os.getenv("HUMAN_REVIEW_DIR", "/tmp/human_review")
 os.makedirs(HUMAN_REVIEW_DIR, exist_ok=True)
+
+# Human-review routing policy: low-confidence or boundary-ambiguous
+# predictions get a human second look. Config-driven rather than hardcoded
+# so the policy can be tuned per deployment without a code change.
+HUMAN_REVIEW_CONFIDENCE_THRESHOLD = float(
+    os.getenv("HUMAN_REVIEW_CONFIDENCE_THRESHOLD", "0.70")
+)
+HUMAN_REVIEW_SCORE_BAND_LOW = float(os.getenv("HUMAN_REVIEW_SCORE_BAND_LOW", "0.40"))
+HUMAN_REVIEW_SCORE_BAND_HIGH = float(os.getenv("HUMAN_REVIEW_SCORE_BAND_HIGH", "0.60"))
 
 
 # 2. Strict 24-Hour TTL Background Task
@@ -97,9 +107,16 @@ def metrics():
     return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
-# Load model configuration from environment or fallback defaults
-MODEL_NAME = os.getenv("MODEL_NAME", "ensemble")
-CHECKPOINT_PATH = os.getenv("MODEL_CHECKPOINT_PATH", None)
+# Load model configuration from environment or fallback defaults.
+# EfficientNet-B4 matches the champion checkpoint baked into the Docker
+# image (checkpoints/champion_efficientnet_b4.pth) — see prepare_submission.py.
+_DEFAULT_CHECKPOINT_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+    "checkpoints",
+    "champion_efficientnet_b4.pth",
+)
+MODEL_NAME = os.getenv("MODEL_NAME", "efficientnet_b4")
+CHECKPOINT_PATH = os.getenv("MODEL_CHECKPOINT_PATH", _DEFAULT_CHECKPOINT_PATH)
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 if DEVICE.type == "cuda":
     try:
@@ -124,12 +141,22 @@ else:
 
 if CHECKPOINT_PATH and os.path.exists(CHECKPOINT_PATH):
     logger.info(f'"Loading checkpoint: {CHECKPOINT_PATH}"')
-    model.load_state_dict(torch.load(CHECKPOINT_PATH, map_location=DEVICE))
+    model.load_state_dict(
+        torch.load(CHECKPOINT_PATH, map_location=DEVICE, weights_only=True)
+    )
 else:
     logger.warning('"No model checkpoint loaded. Running with initialized weights."')
 
 model.to(DEVICE)
 model.eval()
+
+# /classify serves requests from FastAPI's threadpool, and saliency-map
+# generation below mutates shared state on this single model instance
+# (zero_grad + backward populate .grad tensors on its parameters/input).
+# Concurrent requests without this lock would race on that shared state and
+# could return corrupted saliency maps. Inference is fast enough that
+# serializing this section is not a meaningful throughput bottleneck.
+_inference_lock = threading.Lock()
 
 # Select appropriate resolution based on model architecture
 IMAGE_SIZE = (
@@ -227,19 +254,20 @@ def classify_image(
 
     # Inference execution block
     try:
-        # Zero model gradients to prevent leakage and optimize memory cleanup
-        model.zero_grad(set_to_none=True)
+        with _inference_lock:
+            # Zero model gradients to prevent leakage and optimize memory cleanup
+            model.zero_grad(set_to_none=True)
 
-        # Forward pass
-        outputs = model(input_tensor)
-        logit = outputs["logit"]
+            # Forward pass
+            outputs = model(input_tensor)
+            logit = outputs["logit"]
 
-        # Backward pass on logit to compute gradients w.r.t input pixels
-        logit.backward()
+            # Backward pass on logit to compute gradients w.r.t input pixels
+            logit.backward()
 
-        # Compute absolute maximum saliency across the RGB channels
-        saliency, _ = torch.max(input_tensor.grad.data.abs(), dim=1)
-        saliency = saliency.squeeze(0).cpu().numpy()
+            # Compute absolute maximum saliency across the RGB channels
+            saliency, _ = torch.max(input_tensor.grad.data.abs(), dim=1)
+            saliency = saliency.squeeze(0).cpu().numpy()
 
         # Normalize saliency map to 0-255 uint8 format
         sal_min, sal_max = saliency.min(), saliency.max()
@@ -263,9 +291,10 @@ def classify_image(
         # Confidence score scaling (0.0 to 1.0)
         confidence = float(abs(fraud_score - 0.5) * 2.0)
 
-        # Trigger human review for confidence < 0.70 OR ambiguous fraud scores (0.40 - 0.60)
+        # Trigger human review for low-confidence or boundary-ambiguous scores
         requires_human_review = (
-            True if (confidence < 0.70 or 0.40 <= fraud_score <= 0.60) else False
+            confidence < HUMAN_REVIEW_CONFIDENCE_THRESHOLD
+            or HUMAN_REVIEW_SCORE_BAND_LOW <= fraud_score <= HUMAN_REVIEW_SCORE_BAND_HIGH
         )
 
         # Route payload to temporary secure storage if human review is required

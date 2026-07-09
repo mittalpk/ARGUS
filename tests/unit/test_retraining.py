@@ -82,22 +82,40 @@ def test_rate_limiting():
     assert "rate limit exceeded" in response.json()["detail"]
 
 
-def test_approve_retraining_rbac():
+def test_approve_retraining_rbac(monkeypatch):
     """
-    Assert role-based access control on retraining approval.
+    Assert role-based access control on retraining approval requires both the
+    correct role header AND the shared-secret API key (the role header alone
+    is caller-supplied and cannot authorize anything by itself).
     """
+    monkeypatch.setattr(
+        "src.api.retraining.RETRAINING_APPROVAL_API_KEY", "test-secret-key"
+    )
+
     # 1. Submit request
     res = client.post("/retrain", json={"psi": 0.25, "drift_detected": True})
     assert res.status_code == 201
     req_id = res.json()["request_id"]
 
     # 2. Try to approve with incorrect role -> should fail with 403
-    headers_se = {"X-User-Role": "Software Engineer"}
+    headers_se = {"X-User-Role": "Software Engineer", "X-API-Key": "test-secret-key"}
     res_se = client.post(f"/retrain/{req_id}/approve", headers=headers_se)
     assert res_se.status_code == 403
 
-    # 3. Approve with Lead Data Scientist role -> should succeed
-    headers_ds = {"X-User-Role": "Lead Data Scientist"}
+    # 3. Correct role but missing/incorrect API key -> should still fail with 403
+    headers_no_key = {"X-User-Role": "Lead Data Scientist"}
+    res_no_key = client.post(f"/retrain/{req_id}/approve", headers=headers_no_key)
+    assert res_no_key.status_code == 403
+
+    headers_wrong_key = {
+        "X-User-Role": "Lead Data Scientist",
+        "X-API-Key": "not-the-secret",
+    }
+    res_wrong_key = client.post(f"/retrain/{req_id}/approve", headers=headers_wrong_key)
+    assert res_wrong_key.status_code == 403
+
+    # 4. Correct role AND correct API key -> should succeed
+    headers_ds = {"X-User-Role": "Lead Data Scientist", "X-API-Key": "test-secret-key"}
     res_ds = client.post(f"/retrain/{req_id}/approve", headers=headers_ds)
     assert res_ds.status_code == 200
     data = res_ds.json()
@@ -105,6 +123,22 @@ def test_approve_retraining_rbac():
     assert data["approved_by"] == "Lead Data Scientist"
     assert data["dispatched"] is True
     assert data["resolved_at"] is not None
+
+
+def test_approve_retraining_fails_closed_when_unconfigured(monkeypatch):
+    """
+    If no approval secret is configured server-side, approval must be refused
+    outright rather than silently trusting the caller-supplied role header.
+    """
+    monkeypatch.setattr("src.api.retraining.RETRAINING_APPROVAL_API_KEY", None)
+
+    res = client.post("/retrain", json={"psi": 0.25, "drift_detected": True})
+    assert res.status_code == 201
+    req_id = res.json()["request_id"]
+
+    headers_ds = {"X-User-Role": "Lead Data Scientist", "X-API-Key": "anything"}
+    res_ds = client.post(f"/retrain/{req_id}/approve", headers=headers_ds)
+    assert res_ds.status_code == 503
 
 
 def test_list_requests():
