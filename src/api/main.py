@@ -23,6 +23,7 @@ from src.api.monitoring import (
 from src.api.audit import AuditLoggingMiddleware
 from src.models.baseline import ARGUSBackbone
 from src.models.ensemble import ARGUSEnsemble
+from src.api.retraining import router as retraining_router
 
 # Setup logging compliant with EU AI Act (no PII, no image binaries)
 logger = logging.getLogger("ARGUS_API")
@@ -79,8 +80,6 @@ async def lifespan(app: FastAPI):
     except asyncio.CancelledError:
         pass
 
-
-from src.api.retraining import router as retraining_router
 
 app = FastAPI(
     title="ARGUS Identity Verification API", version="1.3.0", lifespan=lifespan
