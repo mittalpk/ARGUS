@@ -29,7 +29,14 @@ if [ -z "${KAGGLE_USERNAME}" ] || [ -z "${KAGGLE_KEY}" ]; then
     chmod 600 "${HOME}/.kaggle/kaggle.json"
 fi
 
-# 2. Create Target Directories
+# 2. Verify local disk has at least 60 GB free space
+AVAILABLE_SPACE_GB=$(df -BG . | tail -n 1 | awk '{print $4}' | tr -d 'G')
+if [ "${AVAILABLE_SPACE_GB}" -lt 60 ]; then
+    echo "Error: Insufficient disk space. Required: 60 GB, Available: ${AVAILABLE_SPACE_GB} GB."
+    exit 1
+fi
+
+# 3. Create Target Directories
 mkdir -p data/
 
 # 3. Download Dataset
