@@ -80,11 +80,14 @@ async def lifespan(app: FastAPI):
         pass
 
 
+from src.api.retraining import router as retraining_router
+
 app = FastAPI(
     title="ARGUS Identity Verification API", version="1.3.0", lifespan=lifespan
 )
 app.add_middleware(AuditLoggingMiddleware)
 app.add_middleware(PrometheusMonitoringMiddleware)
+app.include_router(retraining_router)
 
 
 @app.get("/metrics")

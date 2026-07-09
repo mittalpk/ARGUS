@@ -232,6 +232,29 @@ def run_drift_check(
     return psi_val, drift_detected
 
 
+def trigger_retraining_api(url: str, psi: float):
+    """
+    HTTP POST call to the retraining endpoint when drift is detected.
+    """
+    logger.info(f"Triggering automated retraining API at {url}...")
+    try:
+        import urllib.request
+        import urllib.error
+
+        headers = {"Content-Type": "application/json"}
+        payload_data = json.dumps({"psi": psi, "drift_detected": True}).encode("utf-8")
+        req = urllib.request.Request(
+            url, data=payload_data, headers=headers, method="POST"
+        )
+        with urllib.request.urlopen(req, timeout=10) as response:
+            status_code = response.getcode()
+            logger.info(
+                f"Successfully posted retraining trigger to {url}. HTTP Status: {status_code}"
+            )
+    except Exception as e:
+        logger.error(f"Failed to trigger automated retraining API: {e}")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="ARGUS MLOps Automated Drift Detection Tool"
@@ -266,6 +289,12 @@ if __name__ == "__main__":
         default=None,
         help="Optional path to write a JSON summary report file",
     )
+    parser.add_argument(
+        "--trigger-retrain-url",
+        type=str,
+        default=None,
+        help="API URL to trigger retraining if drift is detected",
+    )
 
     args = parser.parse_args()
 
@@ -277,6 +306,10 @@ if __name__ == "__main__":
             window_hours=args.window_hours,
             output_report_path=args.output_report,
         )
+        # Automatically trigger retraining if drift detected and URL is configured
+        if is_drift and args.trigger_retrain_url:
+            trigger_retraining_api(args.trigger_retrain_url, psi)
+
         # Exit code 2 if drift detected, else 0
         if is_drift:
             sys.exit(2)
