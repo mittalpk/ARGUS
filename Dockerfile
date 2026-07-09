@@ -48,6 +48,7 @@ COPY --from=builder --chown=argus:argus /home/argus/.cache /home/argus/.cache
 WORKDIR /app
 COPY --chown=argus:argus src/ /app/src/
 COPY --chown=argus:argus prepare_submission.py /app/
+COPY --chown=argus:argus entrypoint.sh /app/
 
 # Set env path variables for the non-root user local packages
 ENV PATH=/home/argus/.local/bin:$PATH
@@ -64,5 +65,6 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
   CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
 
-# Start the FastAPI application using uvicorn
-CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Start using entrypoint wrapper
+ENTRYPOINT ["/app/entrypoint.sh"]
+CMD []
