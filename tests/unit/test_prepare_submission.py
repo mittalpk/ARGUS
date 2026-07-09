@@ -47,3 +47,30 @@ def test_predict_labels_generation(mock_inference_env):
 
     # Verify float properties of label column
     assert all(0.0 <= val <= 1.0 for val in df["label"])
+
+
+def test_predict_labels_ensemble(mock_inference_env):
+    env = mock_inference_env
+
+    # Run prediction using ensemble model (random weights verify mode)
+    predict_labels(
+        input_dir=env["input_dir"],
+        output_csv=env["output_csv"],
+        model_name="ensemble",
+        checkpoint_path=None,
+    )
+
+    # Verify file is written
+    assert os.path.exists(env["output_csv"])
+
+    # Verify CSV content structure
+    df = pd.read_csv(env["output_csv"])
+    assert list(df.columns) == ["id", "label"]
+    assert len(df) == 2
+
+    # Extract IDs and sort to match
+    ids = sorted(list(df["id"]))
+    assert ids == ["doc_blue", "doc_red"]
+
+    # Verify float properties of label column
+    assert all(0.0 <= val <= 1.0 for val in df["label"])

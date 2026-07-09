@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 def predict_labels(
     input_dir: str = "/data",
     output_csv: str = "/submissions/submission.csv",
-    model_name: str = "convnextv2_base",
+    model_name: str = "ensemble",
     checkpoint_path: str = None,
 ):
     """
@@ -41,7 +41,12 @@ def predict_labels(
     logger.info(f"Using inference device: {device}")
 
     # Pretrained=False to comply with no-network sandbox requirements
-    model = ARGUSBackbone(model_name=model_name, pretrained=False)
+    if model_name.lower() == "ensemble":
+        from src.models.ensemble import ARGUSEnsemble
+
+        model = ARGUSEnsemble(pretrained=False)
+    else:
+        model = ARGUSBackbone(model_name=model_name, pretrained=False)
 
     # Load model weights if provided
     if checkpoint_path and os.path.exists(checkpoint_path):
@@ -56,9 +61,12 @@ def predict_labels(
     model.eval()
 
     # Match the image size required by the model architecture
-    image_size = (
-        448 if "eva" in model_name else (384 if "convnext" in model_name else 380)
-    )
+    if model_name.lower() == "ensemble":
+        image_size = 448
+    else:
+        image_size = (
+            448 if "eva" in model_name else (384 if "convnext" in model_name else 380)
+        )
 
     # Validation/Inference transform
     transform = A.Compose(
@@ -131,7 +139,7 @@ if __name__ == "__main__":
         help="Path to write submission.csv",
     )
     parser.add_argument(
-        "--model_name", type=str, default="convnextv2_base", help="Model backbone name"
+        "--model_name", type=str, default="ensemble", help="Model backbone name"
     )
     parser.add_argument(
         "--checkpoint",
