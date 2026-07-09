@@ -294,7 +294,9 @@ def classify_image(
         # Trigger human review for low-confidence or boundary-ambiguous scores
         requires_human_review = (
             confidence < HUMAN_REVIEW_CONFIDENCE_THRESHOLD
-            or HUMAN_REVIEW_SCORE_BAND_LOW <= fraud_score <= HUMAN_REVIEW_SCORE_BAND_HIGH
+            or HUMAN_REVIEW_SCORE_BAND_LOW
+            <= fraud_score
+            <= HUMAN_REVIEW_SCORE_BAND_HIGH
         )
 
         # Route payload to temporary secure storage if human review is required

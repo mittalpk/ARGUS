@@ -20,7 +20,9 @@ STATE_FILE = os.getenv("RETRAINING_STATE_FILE", "data/retraining_state.json")
 RETRAINING_APPROVAL_API_KEY = os.getenv("RETRAINING_APPROVAL_API_KEY")
 
 
-def _check_approval_authorized(x_user_role: Optional[str], x_api_key: Optional[str]) -> None:
+def _check_approval_authorized(
+    x_user_role: Optional[str], x_api_key: Optional[str]
+) -> None:
     if not RETRAINING_APPROVAL_API_KEY:
         # Fail closed: an approval endpoint with no configured secret would
         # otherwise accept the role header alone, which is unauthenticated.
@@ -28,8 +30,10 @@ def _check_approval_authorized(x_user_role: Optional[str], x_api_key: Optional[s
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Retraining approval is not configured (RETRAINING_APPROVAL_API_KEY unset).",
         )
-    if x_user_role != "Lead Data Scientist" or not x_api_key or not secrets.compare_digest(
-        x_api_key, RETRAINING_APPROVAL_API_KEY
+    if (
+        x_user_role != "Lead Data Scientist"
+        or not x_api_key
+        or not secrets.compare_digest(x_api_key, RETRAINING_APPROVAL_API_KEY)
     ):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

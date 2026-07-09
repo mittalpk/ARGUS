@@ -26,19 +26,41 @@ from datetime import datetime, timezone
 # it is skipped under tests/, where such values are expected.
 SECRET_PATTERNS = [
     ("AWS Access Key ID", re.compile(r"AKIA[0-9A-Z]{16}"), True),
-    ("AWS Secret Access Key", re.compile(r"(?i)aws_secret_access_key\s*[:=]\s*['\"]?[A-Za-z0-9/+=]{40}['\"]?"), True),
+    (
+        "AWS Secret Access Key",
+        re.compile(
+            r"(?i)aws_secret_access_key\s*[:=]\s*['\"]?[A-Za-z0-9/+=]{40}['\"]?"
+        ),
+        True,
+    ),
     ("Kaggle API Token", re.compile(r"KGAT_[0-9a-fA-F]{16,}"), True),
-    ("Private Key Block", re.compile(r"-----BEGIN (RSA|EC|OPENSSH|DSA|PGP) PRIVATE KEY-----"), True),
+    (
+        "Private Key Block",
+        re.compile(r"-----BEGIN (RSA|EC|OPENSSH|DSA|PGP) PRIVATE KEY-----"),
+        True,
+    ),
     ("Slack Token", re.compile(r"xox[baprs]-[0-9A-Za-z-]{10,}"), True),
     ("GitHub Token", re.compile(r"gh[pousr]_[A-Za-z0-9]{36,}"), True),
-    ("Generic Bearer/API Token Assignment", re.compile(
-        r"(?i)(api[_-]?key|api[_-]?token|secret[_-]?key|access[_-]?token)\s*[:=]\s*['\"][A-Za-z0-9_\-./+]{16,}['\"]"
-    ), False),
+    (
+        "Generic Bearer/API Token Assignment",
+        re.compile(
+            r"(?i)(api[_-]?key|api[_-]?token|secret[_-]?key|access[_-]?token)\s*[:=]\s*['\"][A-Za-z0-9_\-./+]{16,}['\"]"
+        ),
+        False,
+    ),
 ]
 
 DEFAULT_EXCLUDE_DIRS = {
-    ".git", ".venv", "venv", "node_modules", "__pycache__", ".pytest_cache",
-    ".ruff_cache", ".dvc", "mlruns", "data",
+    ".git",
+    ".venv",
+    "venv",
+    "node_modules",
+    "__pycache__",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".dvc",
+    "mlruns",
+    "data",
 }
 
 # Directories where low-confidence generic patterns are expected to produce
@@ -50,7 +72,9 @@ LOW_CONFIDENCE_EXEMPT_DIRS = {"tests"}
 PLACEHOLDER_SUBSTRINGS = ("REPLACE_WITH", "YOUR_", "EXAMPLE", "xxxxxxxx", "changeme")
 
 
-def scan_repo_for_secrets(repo_root: str, exclude_dirs: set | None = None) -> list[dict]:
+def scan_repo_for_secrets(
+    repo_root: str, exclude_dirs: set | None = None
+) -> list[dict]:
     exclude_dirs = exclude_dirs or DEFAULT_EXCLUDE_DIRS
     findings = []
 
@@ -72,12 +96,14 @@ def scan_repo_for_secrets(repo_root: str, exclude_dirs: set | None = None) -> li
                                 continue
                             match = pattern.search(line)
                             if match:
-                                findings.append({
-                                    "rule": rule_name,
-                                    "file": os.path.relpath(filepath, repo_root),
-                                    "line": line_num,
-                                    "match_preview": match.group(0)[:12] + "...",
-                                })
+                                findings.append(
+                                    {
+                                        "rule": rule_name,
+                                        "file": os.path.relpath(filepath, repo_root),
+                                        "line": line_num,
+                                        "match_preview": match.group(0)[:12] + "...",
+                                    }
+                                )
             except (UnicodeDecodeError, PermissionError, OSError):
                 continue
 
