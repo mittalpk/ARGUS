@@ -11,6 +11,15 @@ from dotenv import load_dotenv
 # Load env variables from .env
 load_dotenv()
 
+# Verify local disk has at least 60 GB free space
+total, used, free = shutil.disk_usage(".")
+free_gb = free / (1024**3)
+if free_gb < 60.0:
+    print(
+        f"Error: Insufficient disk space. Required: 60 GB, Available: {free_gb:.2f} GB."
+    )
+    exit(1)
+
 # Map KAGGLE_API_TOKEN to KAGGLE_KEY if provided
 if "KAGGLE_API_TOKEN" in os.environ and "KAGGLE_KEY" not in os.environ:
     os.environ["KAGGLE_KEY"] = os.environ["KAGGLE_API_TOKEN"]
