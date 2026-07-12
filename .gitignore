@@ -1,11 +1,5 @@
 # Project ARGUS Gitignore
 
-# Ignore all top-level dotfiles/dotdirs by default (IDE configs like
-# .agents/ and .claude/, local venvs, caches, credentials, etc.), then
-# explicitly re-include the ones that must stay tracked/trackable. This is
-# broader than listing each local tool one at a time (.agents/, .claude/,
-# ...) but the re-includes below keep it from silently blocking anything
-# real that belongs in the repo.
 .*
 !.gitignore
 !.dockerignore
@@ -48,10 +42,3 @@ mlflow.db
 # Hydra Config Output
 outputs/
 multirun/
-
-# Internal audit/remediation trail and local submission-prep working docs —
-# not part of the public reproducibility deliverable (the repo root already
-# contains everything needed to reproduce it: Dockerfile, src/, checkpoints/,
-# requirements.txt). Kept locally, intentionally excluded from the public repo.
-/audit.md
-/submission/

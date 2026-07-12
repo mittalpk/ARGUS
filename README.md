@@ -24,17 +24,23 @@ and verify it end-to-end.
 ARGUS/
 ├── docs/                           # Architecture and design documentation
 │   ├── project_runbook.md          # End-to-end project runbook
-│   ├── 00_Project_Charter.md       # Project Charter (Phase 0)
-│   ├── 01_Architecture_Vision.md   # TOGAF Phase A Architecture Vision (Phase 0)
-│   ├── 02_BRD.md                   # Business Requirements Document (Phase 1)
-│   ├── 03_Use_Case_Specification.md# Use Case Specifications (Phase 1)
-│   ├── 04_SAD.md                   # Solution Architecture Document (Phase 2)
-│   ├── 05_DAD.md                   # Data Architecture Document (Phase 2)
-│   ├── adr/                        # Architecture Decision Records (Phase 2)
-│   ├── 06_ML_Design.md             # AI/ML Design Document (Phase 3)
-│   ├── 07_Test_Strategy.md         # Test Strategy (Phase 3)
-│   ├── 08_Security_Compliance.md   # Security & Compliance (Phase 4)
-│   └── 09_Operations_Runbook.md    # Operations Runbook (Phase 4)
+│   ├── 10_Product_Backlog.md       # Product backlog
+│   ├── Phase-0/                    # Charter, stakeholder matrix, architecture vision
+│   │   ├── 00_Project_Charter.md
+│   │   └── 01_Architecture_Vision.md
+│   ├── Phase-1/                    # Business & use-case requirements
+│   │   ├── 02_BRD.md
+│   │   └── 03_Use_Case_Specification.md
+│   ├── Phase-2/                    # Solution & data architecture
+│   │   ├── 04_SAD.md
+│   │   ├── 05_DAD.md
+│   │   └── adr/                    # Architecture Decision Records
+│   ├── Phase-3/                    # AI/ML design & test strategy
+│   │   ├── 06_ML_Design.md
+│   │   └── 07_Test_Strategy.md
+│   └── Phase-4/                    # Security, compliance & operations
+│       ├── 08_Security_Compliance.md
+│       └── 09_Operations_Runbook.md
 ├── src/                            # Core source code
 │   ├── data/                       # Preprocessing and augmentation pipelines
 │   ├── models/                     # Model definitions and ensembles
@@ -76,39 +82,8 @@ bash scripts/download_data.sh
 
 ---
 
-## Reproducing the Submission
-
-1. **Download the dataset** (above) — this populates `data/the-freuid-challenge-2026/`.
-2. **Train the champion checkpoint** that ships inside the Docker image:
-   ```bash
-   bash scripts/train_champion_checkpoint.sh
-   ```
-   This runs the same ingestion → split → train → model-gate pipeline used
-   in production on a fixed-seed stratified sample of the training set, and
-   writes `checkpoints/champion_efficientnet_b4.pth`. Raise `SAMPLE_PER_CLASS`
-   and `EPOCHS` (env vars) to train on more data for a stronger model.
-3. **Generate real compliance evidence** from that run:
-   ```bash
-   pip install -r requirements-dev.txt
-   python scripts/package_compliance_evidence.py
-   ```
-4. **Build and verify the sandboxed Docker image**:
-   ```bash
-   docker build -t argus-freuid:local .
-   docker run --rm --network none \
-     -v "$(pwd)/data/the-freuid-challenge-2026/public_test:/data:ro" \
-     -v "$(pwd)/out:/submissions" \
-     argus-freuid:local
-   ```
-   Verify `out/submission.csv` has one `id,label` row per input image.
-
-See the FREUID Challenge 2026 reproducibility page for the full prize-eligibility checklist and Kaggle forum reply requirements.
-
----
-
 ## Author
-**Praveen Mittal**  
-[praveenmittal.com](https://praveenmittal.com) | [LinkedIn](https://linkedin.com/in/praveen-mittal)
+**Praveen Mittal**  [LinkedIn](linkedin.com/in/pkmittal28)
 
 ---
 
