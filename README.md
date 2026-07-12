@@ -69,7 +69,7 @@ We optimize for the competition's primary metric along with key production-focus
 
 ### 1. Setup Environment
 ```bash
-git clone https://github.com/praveenmittal/ARGUS
+git clone https://github.com/mittalpk/ARGUS
 cd ARGUS
 bash scripts/setup.sh
 ```
@@ -83,7 +83,7 @@ bash scripts/download_data.sh
 ---
 
 ## Author
-**Praveen Mittal**  [LinkedIn](linkedin.com/in/pkmittal28)
+**Praveen Mittal**  [LinkedIn](https://linkedin.com/in/pkmittal28)
 
 ---
 
